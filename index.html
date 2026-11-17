@@ -1,0 +1,3687 @@
+<!DOCTYPE html>
+<!--
+  Folio — Interactive Data Visualization & Dashboard Template
+  WCAG 2.2 AA Contrast Verification across all 7 themes:
+  All 34 colour pairs per theme (text >= 4.5:1, graphics/UI >= 3.0:1) are defined
+  in the theme blocks below (--paper, --paper-raised, --ink, --ink-2, --ink-3,
+  --rule, --band, --white, --violet, --violet-ink, --vermilion, --vermilion-ink,
+  --magenta, --on-violet, --on-vermilion, --on-magenta, --violet-100..600,
+  --vermilion-tint, --violet-tint, --neutral-data).
+  Notes:
+  - -violet, -vermilion and -magenta represent data series A, B and C across themes.
+  - -white represents ink on the header band and on dark heatmap cells (500-600);
+    in Night Edition the band is light amber (#F2B84B), so -white is #121318.
+  - -vermilion-ink is used whenever series-B colour appears as text on paper.
+-->
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6C50F6">
+  <script>
+    (function () {
+      var ids = ['lavender-press','newsprint','night-edition','gazette-mono','swiss-poster','forest-ochre','riso-pastel'];
+      var t = 'lavender-press';
+      try { var s = localStorage.getItem('folio.theme.v1'); if (ids.indexOf(s) > -1) t = s; } catch (e) {}
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <title>Folio – Telco Customer Churn &amp; Retention Analytics</title>
+  <meta name="description" content="Explore customer churn drivers, tenure hazard curves, monthly recurring revenue at risk, and 36 subscriber micro-segments across 7,043 telecom accounts.">
+  <meta name="keywords" content="telco customer churn, churn analytics, retention dashboard, tenure hazard curve, MRR at risk, customer segmentation, accessible charts, CSV export">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Folio">
+  <meta property="og:title" content="Folio – Telco Customer Churn &amp; Retention Analytics">
+  <meta property="og:description" content="Explore customer churn drivers, tenure hazard curves, monthly recurring revenue at risk, and 36 subscriber micro-segments across 7,043 telecom accounts.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Folio – Telco Customer Churn &amp; Retention Analytics">
+  <meta name="twitter:description" content="Explore customer churn drivers, tenure hazard curves, monthly recurring revenue at risk, and 36 subscriber micro-segments across 7,043 telecom accounts.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Folio Telco Customer Churn Dashboard",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "All",
+    "description": "Interactive telecom churn and retention analytics dashboard powered by 7,043 customer accounts across contract terms, internet tiers, tenure cohorts, and payment methods.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Derived theme-agnostic tokens (--violet/--vermilion/--magenta mean data series A/B/C) */
+      --band-hairline: color-mix(in srgb, var(--white) 45%, transparent);
+      --band-rule: color-mix(in srgb, var(--white) 25%, transparent);
+      --band-progress: color-mix(in srgb, var(--white) 60%, transparent);
+      --grid-line: color-mix(in srgb, var(--violet) 15%, transparent);
+      --scrim: color-mix(in srgb, var(--ink) 38%, transparent);
+      color-scheme: light;
+
+      /* Type families */
+      --font-sans: "Geist", "Inter", "Helvetica Neue", Arial, system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+      /* Fluid type scale */
+      --t-numeral: clamp(96px, 13vw, 232px);
+      --t-display: clamp(44px, 5.2vw, 84px);
+      --t-h2: clamp(32px, 3.4vw, 54px);
+      --t-kpi: clamp(44px, 4.6vw, 76px);
+      --t-h3: 24px;
+      --t-lede: clamp(18px, 1.5vw, 21px);
+      --t-body: 15px;
+      --t-label: 13px;
+      --t-micro: 11px;
+
+      /* 8pt spacing scale */
+      --s-1: 4px;
+      --s-2: 8px;
+      --s-3: 16px;
+      --s-4: 24px;
+      --s-5: 32px;
+      --s-6: 48px;
+      --s-7: 64px;
+      --s-8: 96px;
+      --s-9: 128px;
+      --s-10: 192px;
+
+      /* Grid */
+      --gutter: 24px;
+      --outer-margin: clamp(20px, 4vw, 64px);
+      --container-max: 1440px;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.2, 0, 0, 1);
+      --ease-in-out: cubic-bezier(0.7, 0, 0.2, 1);
+      --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+      --d-1: 120ms;
+      --d-2: 240ms;
+      --d-3: 600ms;
+      --d-4: 900ms;
+      --d-5: 1200ms;
+    }
+
+    :root[data-theme="night-edition"] {
+      --scrim: color-mix(in srgb, #000000 62%, transparent);
+      color-scheme: dark;
+    }
+
+    /* Curated Theme Blocks (single source of truth for both :root and [data-swatch]) */
+    :root,
+    :root[data-theme="lavender-press"],
+    [data-swatch="lavender-press"] {
+      --paper: #E8E6EF;
+      --paper-raised: #F4F3F8;
+      --ink: #121116;
+      --ink-2: #4A4752;
+      --ink-3: #625F6B;
+      --rule: #B8B4C4;
+      --band: #6C50F6;
+      --white: #FFFFFF;
+      --violet: #7C63FF;
+      --violet-ink: #5A3BE6;
+      --vermilion: #E2492C;
+      --vermilion-ink: #B5321A;
+      --magenta: #C04BD9;
+      --on-violet: #121116;
+      --on-vermilion: #121116;
+      --on-magenta: #121116;
+      --violet-100: #E4DFFC;
+      --violet-200: #C9BEFB;
+      --violet-300: #A797FC;
+      --violet-400: #7C63FF;
+      --violet-500: #5A3BE6;
+      --violet-600: #3A22A8;
+      --vermilion-tint: #F2A391;
+      --violet-tint: #B9ABFB;
+      --neutral-data: #CFCBD9;
+    }
+
+    :root[data-theme="newsprint"],
+    [data-swatch="newsprint"] {
+      --paper: #F0EADB;
+      --paper-raised: #F8F4EA;
+      --ink: #1A1714;
+      --ink-2: #4A4239;
+      --ink-3: #655B4F;
+      --rule: #C9BEA9;
+      --band: #1A1714;
+      --white: #F0EADB;
+      --violet: #2C4F8C;
+      --violet-ink: #2C4F8C;
+      --vermilion: #B23A1E;
+      --vermilion-ink: #9E3219;
+      --magenta: #8C6A1C;
+      --on-violet: #F8F4EA;
+      --on-vermilion: #F8F4EA;
+      --on-magenta: #F8F4EA;
+      --violet-100: #E4E3E0;
+      --violet-200: #C3CAD6;
+      --violet-300: #94A5C0;
+      --violet-400: #6D84AC;
+      --violet-500: #2C4F8C;
+      --violet-600: #1B2F57;
+      --vermilion-tint: #E6AE9C;
+      --violet-tint: #A9B8D2;
+      --neutral-data: #D6CDBB;
+    }
+
+    :root[data-theme="night-edition"],
+    [data-swatch="night-edition"] {
+      --paper: #121318;
+      --paper-raised: #1C1E25;
+      --ink: #ECEAF2;
+      --ink-2: #B9B6C4;
+      --ink-3: #9893A3;
+      --rule: #3A3C47;
+      --band: #F2B84B;
+      --white: #121318;
+      --violet: #8FA2FF;
+      --violet-ink: #A9B6FF;
+      --vermilion: #FF7A59;
+      --vermilion-ink: #FF8F73;
+      --magenta: #E58AF0;
+      --on-violet: #121318;
+      --on-vermilion: #121318;
+      --on-magenta: #121318;
+      --violet-100: #1E2133;
+      --violet-200: #283063;
+      --violet-300: #33408A;
+      --violet-400: #3F52A8;
+      --violet-500: #8FA2FF;
+      --violet-600: #C7D0FF;
+      --vermilion-tint: #6B3A30;
+      --violet-tint: #3B437A;
+      --neutral-data: #3A3C47;
+    }
+
+    :root[data-theme="gazette-mono"],
+    [data-swatch="gazette-mono"] {
+      --paper: #FFFFFF;
+      --paper-raised: #F4F4F4;
+      --ink: #0A0A0A;
+      --ink-2: #3D3D3D;
+      --ink-3: #595959;
+      --rule: #BDBDBD;
+      --band: #0A0A0A;
+      --white: #FFFFFF;
+      --violet: #4A4A4A;
+      --violet-ink: #0A0A0A;
+      --vermilion: #8C8C8C;
+      --vermilion-ink: #4A4A4A;
+      --magenta: #6B6B6B;
+      --on-violet: #FFFFFF;
+      --on-vermilion: #0A0A0A;
+      --on-magenta: #FFFFFF;
+      --violet-100: #F0F0F0;
+      --violet-200: #D6D6D6;
+      --violet-300: #B3B3B3;
+      --violet-400: #8C8C8C;
+      --violet-500: #4A4A4A;
+      --violet-600: #1F1F1F;
+      --vermilion-tint: #CFCFCF;
+      --violet-tint: #A6A6A6;
+      --neutral-data: #E0E0E0;
+    }
+
+    :root[data-theme="swiss-poster"],
+    [data-swatch="swiss-poster"] {
+      --paper: #F3F1EC;
+      --paper-raised: #FBFAF7;
+      --ink: #111111;
+      --ink-2: #3F3F3F;
+      --ink-3: #5E5E5E;
+      --rule: #C4C1BA;
+      --band: #D7141A;
+      --white: #FFFFFF;
+      --violet: #D7141A;
+      --violet-ink: #B5101A;
+      --vermilion: #1E4FD6;
+      --vermilion-ink: #1A44B8;
+      --magenta: #808080;
+      --on-violet: #FFFFFF;
+      --on-vermilion: #FFFFFF;
+      --on-magenta: #111111;
+      --violet-100: #F6E3DF;
+      --violet-200: #F0BDB5;
+      --violet-300: #E88A7F;
+      --violet-400: #E0564C;
+      --violet-500: #C21218;
+      --violet-600: #7E0B10;
+      --vermilion-tint: #B5C6F2;
+      --violet-tint: #EFA49C;
+      --neutral-data: #D9D6CF;
+    }
+
+    :root[data-theme="forest-ochre"],
+    [data-swatch="forest-ochre"] {
+      --paper: #EAE6D6;
+      --paper-raised: #F4F1E6;
+      --ink: #18201A;
+      --ink-2: #3F4A40;
+      --ink-3: #58625A;
+      --rule: #BDB89F;
+      --band: #24432E;
+      --white: #F4F1E6;
+      --violet: #3B7A4B;
+      --violet-ink: #2C6339;
+      --vermilion: #8F5B06;
+      --vermilion-ink: #835406;
+      --magenta: #A5432A;
+      --on-violet: #F4F1E6;
+      --on-vermilion: #F4F1E6;
+      --on-magenta: #F4F1E6;
+      --violet-100: #E3E5D3;
+      --violet-200: #C3D3B6;
+      --violet-300: #9DBB92;
+      --violet-400: #76A06F;
+      --violet-500: #2F6A3F;
+      --violet-600: #1B3F26;
+      --vermilion-tint: #E2C48B;
+      --violet-tint: #A9C6A3;
+      --neutral-data: #D3CDB6;
+    }
+
+    :root[data-theme="riso-pastel"],
+    [data-swatch="riso-pastel"] {
+      --paper: #F7F2E8;
+      --paper-raised: #FDFAF4;
+      --ink: #22203A;
+      --ink-2: #4C4864;
+      --ink-3: #625E7A;
+      --rule: #D9CFE0;
+      --band: #D6246E;
+      --white: #FFFFFF;
+      --violet: #0074BE;
+      --violet-ink: #005E9C;
+      --vermilion: #D6246E;
+      --vermilion-ink: #B01A58;
+      --magenta: #007F78;
+      --on-violet: #FFFFFF;
+      --on-vermilion: #FFFFFF;
+      --on-magenta: #FFFFFF;
+      --violet-100: #EAF1F7;
+      --violet-200: #CFE3F2;
+      --violet-300: #A6CDEB;
+      --violet-400: #6FB0E0;
+      --violet-500: #0067A8;
+      --violet-600: #00446F;
+      --vermilion-tint: #F7B6CF;
+      --violet-tint: #B5D8F2;
+      --neutral-data: #E3DCEB;
+    }
+
+    @media (min-width: 1280px) {
+      :root {
+        --t-body: 16px;
+      }
+    }
+
+    @media (max-width: 767px) {
+      :root {
+        --gutter: 16px;
+        --t-numeral: clamp(72px, 26vw, 120px);
+      }
+    }
+
+    @media (max-width: 479px) {
+      :root {
+        --t-display: clamp(34px, 9.5vw, 44px);
+        --t-h2: clamp(26px, 7.2vw, 32px);
+        --t-kpi: clamp(34px, 9.5vw, 44px);
+      }
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scrollbar-gutter: stable;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x: clip;
+    }
+
+    html.panel-open {
+      overflow: hidden;
+    }
+
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: 400ms;
+      animation-timing-function: var(--ease-std);
+    }
+
+    html.theme-fading body,
+    html.theme-fading body *:not(svg *):not([style*="transition"]) {
+      transition:
+        background-color 400ms var(--ease-std),
+        color 400ms var(--ease-std),
+        border-color 400ms var(--ease-std),
+        outline-color 400ms var(--ease-std) !important;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: var(--t-body);
+      line-height: 1.55;
+      font-variant-numeric: lining-nums;
+      overflow-x: clip;
+    }
+
+    /* Typography helpers */
+    .num, table td[data-num], .kpi-num, .band-folio, .pager-link, .tt-val {
+      font-feature-settings: "ss01" 0;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    h1, h2, h3, p, ul, ol, figure, figcaption, blockquote {
+      margin: 0;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--violet-ink);
+      outline-offset: 2px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: var(--s-2);
+      left: var(--s-3);
+      z-index: 300;
+      background: var(--ink);
+      color: var(--paper);
+      padding: var(--s-2) var(--s-3);
+      font-size: var(--t-label);
+      font-weight: 500;
+      text-decoration: none;
+      transform: translateY(-200%);
+      transition: transform var(--d-1) var(--ease-std);
+    }
+    .skip-link:focus {
+      transform: translateY(0);
+      outline: 2px solid var(--white);
+    }
+
+    /* Logotype */
+    .logotype {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .logotype-brand {
+      font-weight: 600;
+      letter-spacing: -0.045em;
+    }
+    .logotype-rule {
+      display: inline-block;
+      width: 1px;
+      height: 0.8em;
+      margin: 0 var(--s-2);
+      background: currentColor;
+      opacity: 0.85;
+    }
+    .logotype-title {
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+    .logotype-year {
+      font-weight: 400;
+      margin-left: 0.35em;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    .logotype--hero {
+      font-size: 20px;
+      color: var(--ink);
+    }
+    @media (max-width: 639px) {
+      .logotype--hero {
+        font-size: clamp(14.5px, 4.3vw, 20px);
+      }
+    }
+    .logotype--band {
+      font-size: 12px;
+      color: var(--white);
+    }
+    .logotype--footer {
+      font-size: 15px;
+      color: var(--ink);
+    }
+
+    /* Header Band */
+    .band {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: var(--band);
+      color: var(--white);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+    }
+    .band-inner {
+      width: 100%;
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 var(--outer-margin);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s-4);
+      height: 100%;
+    }
+    .band-left {
+      display: flex;
+      align-items: center;
+      gap: var(--s-4);
+      min-width: 0;
+    }
+    .band-folio {
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+    .band-running {
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: opacity 160ms var(--ease-std);
+    }
+    .band-running.is-fading {
+      opacity: 0;
+    }
+    .band-logo-wrap {
+      display: none;
+      align-items: center;
+    }
+    @media (min-width: 1280px) {
+      .band-logo-wrap {
+        display: flex;
+      }
+    }
+    .band-right {
+      display: flex;
+      align-items: center;
+      gap: var(--s-4);
+      flex-shrink: 0;
+    }
+    .band :focus-visible {
+      outline: 2px solid var(--white);
+      outline-offset: 2px;
+    }
+
+    /* Pager */
+    .pager-nav {
+      display: flex;
+      align-items: center;
+      gap: var(--s-2);
+    }
+    .pager-label {
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--white);
+    }
+    .pager-list {
+      position: relative;
+      display: flex;
+      align-items: center;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      height: 24px;
+    }
+    .pager-circle {
+      position: absolute;
+      top: 2px;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--white);
+      z-index: 1;
+      pointer-events: none;
+      transition: transform var(--d-2) var(--ease-std);
+    }
+    .pager-list li {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+    .pager-link {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--white);
+      text-decoration: none;
+      transition: color var(--d-2) var(--ease-std);
+    }
+    .pager-link:hover {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .pager-link[aria-current="true"] {
+      color: var(--band);
+    }
+    .pager-link[aria-current="true"]:hover {
+      text-decoration: none;
+    }
+
+    /* Mobile pager */
+    .pager-mobile {
+      display: none;
+      align-items: center;
+      gap: var(--s-1);
+    }
+    .pager-step, .pager-toggle {
+      background: transparent;
+      border: 0;
+      color: var(--white);
+      font-family: var(--font-sans);
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      min-width: 24px;
+      min-height: 24px;
+      padding: 0 var(--s-1);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .pager-dropdown {
+      position: fixed;
+      top: 40px;
+      left: 0;
+      right: 0;
+      max-height: calc(100dvh - 40px);
+      overflow-y: auto;
+      background: var(--band);
+      border-top: 1px solid var(--band-rule);
+      padding: var(--s-3) var(--outer-margin);
+      z-index: 199;
+    }
+    .pager-dropdown[hidden] {
+      display: none;
+    }
+    .pager-dropdown ol {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-1) var(--s-4);
+    }
+    @media (max-width: 479px) {
+      .pager-dropdown ol {
+        grid-template-columns: 1fr;
+      }
+    }
+    .pager-dropdown a {
+      display: flex;
+      align-items: center;
+      gap: var(--s-2);
+      min-height: 32px;
+      color: var(--white);
+      text-decoration: none;
+      font-size: var(--t-label);
+      font-weight: 500;
+    }
+    .pager-dropdown a[aria-current="true"] {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* Band Control Panel button & separator */
+    .band-sep {
+      width: 1px;
+      height: 16px;
+      background: var(--band-hairline);
+      flex-shrink: 0;
+    }
+    .band-btn {
+      appearance: none;
+      position: relative;
+      height: 28px;
+      padding: 0 var(--s-2);
+      border: 1px solid var(--band-hairline);
+      border-radius: 0;
+      background: transparent;
+      color: var(--white);
+      font-family: var(--font-sans);
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+      white-space: nowrap;
+      transition: background-color var(--d-1) var(--ease-std), color var(--d-1) var(--ease-std), border-color var(--d-1) var(--ease-std);
+    }
+    .band-btn:hover,
+    .band-btn:active,
+    .band-btn[aria-expanded="true"] {
+      background: var(--white);
+      color: var(--band);
+      border-color: var(--white);
+    }
+    @media (pointer: coarse) {
+      .band-btn::after {
+        content: "";
+        position: absolute;
+        inset: -8px;
+      }
+    }
+    .band-btn-glyph {
+      width: 10px;
+      height: 10px;
+      flex-shrink: 0;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+    }
+    .band-close-x {
+      position: relative;
+      width: 9px;
+      height: 9px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .band-close-x::before,
+    .band-close-x::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      width: 9px;
+      height: 1px;
+      background: currentColor;
+    }
+    .band-close-x::before { transform: rotate(45deg); }
+    .band-close-x::after { transform: rotate(-45deg); }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .band-right {
+        gap: var(--s-3);
+      }
+      .band--hide-label .pager-label {
+        display: none;
+      }
+      .band--hide-folio #bandFolioRight {
+        display: none;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .pager-desktop, .pager-label, #bandFolioRight, .band-sep {
+        display: none;
+      }
+      .pager-mobile {
+        display: flex;
+      }
+      .band-inner {
+        gap: var(--s-2);
+      }
+      .band-left {
+        gap: var(--s-2);
+      }
+      .band-right {
+        gap: var(--s-2);
+      }
+      .band-btn#themePanelBtn {
+        width: 32px;
+        height: 28px;
+        padding: 0;
+        justify-content: center;
+      }
+      .band-btn-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    }
+    @media (max-width: 399px) {
+      #bandFolioLeft {
+        display: none;
+      }
+    }
+
+    /* Scroll progress line */
+    .scroll-progress {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: var(--band-progress);
+      transform-origin: left center;
+      transform: scaleX(0);
+      pointer-events: none;
+    }
+
+    /* Grid overlay (G shortcut) */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      pointer-events: none;
+      display: none;
+    }
+    .grid-overlay.is-on {
+      display: block;
+    }
+    .grid-overlay-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      height: 100%;
+      padding: 0 var(--outer-margin);
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: var(--gutter);
+    }
+    .grid-overlay-col {
+      border-left: 1px solid var(--grid-line);
+      border-right: 1px solid var(--grid-line);
+      height: 100%;
+    }
+
+    /* Container & Spreads */
+    main {
+      width: 100%;
+    }
+
+    .spread {
+      position: relative;
+      min-height: 100svh;
+      padding-top: var(--s-8);
+      padding-bottom: var(--s-7);
+      border-bottom: 1px solid var(--rule);
+      overflow-x: clip;
+    }
+    #s01 {
+      padding-top: var(--s-7);
+      padding-bottom: var(--s-6);
+    }
+    .spread--compact {
+      min-height: auto;
+    }
+    .spread-container {
+      position: relative;
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 var(--outer-margin);
+    }
+    .spread-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--gutter);
+      row-gap: var(--s-6);
+      align-items: start;
+    }
+
+    /* Centre Spine on desktop spreads */
+    @media (min-width: 1024px) {
+      .spread--spined .spread-grid::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: calc(-1 * var(--s-6));
+        bottom: calc(-1 * var(--s-6));
+        width: 1px;
+        background: var(--rule);
+        pointer-events: none;
+      }
+      .page-left {
+        grid-column: 1 / 7;
+        padding-right: var(--s-3);
+      }
+      .page-right {
+        grid-column: 7 / 13;
+        padding-left: var(--s-3);
+      }
+      .page-full {
+        grid-column: 1 / 13;
+      }
+    }
+
+    @media (max-width: 1023px) {
+      .page-left, .page-right, .page-full {
+        grid-column: 1 / 13;
+      }
+      .page-headline-first {
+        order: -1;
+      }
+    }
+
+    /* Typographic hierarchy */
+    .kicker {
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+      color: var(--ink-3);
+      margin-bottom: var(--s-3);
+    }
+
+    .headline-display {
+      font-size: var(--t-display);
+      font-weight: 430;
+      line-height: 1.00;
+      letter-spacing: -0.035em;
+      text-wrap: balance;
+      color: var(--ink);
+    }
+
+    .headline-h2 {
+      font-size: var(--t-h2);
+      font-weight: 430;
+      line-height: 1.06;
+      letter-spacing: -0.028em;
+      max-width: 17ch;
+      text-wrap: balance;
+      color: var(--ink);
+    }
+    .headline-h2:focus {
+      outline: none;
+    }
+
+    .line {
+      display: block;
+      overflow: hidden;
+      padding-bottom: 0.09em;
+      margin-bottom: -0.09em;
+    }
+    .line-inner {
+      display: block;
+      transform: translateY(105%);
+      transition: transform var(--d-4) var(--ease-out);
+    }
+    .is-in .line-inner {
+      transform: translateY(0);
+    }
+    .line:nth-child(2) .line-inner {
+      transition-delay: 80ms;
+    }
+    .line:nth-child(3) .line-inner {
+      transition-delay: 160ms;
+    }
+
+    .rule-strong {
+      border: 0;
+      border-top: 1px solid var(--ink);
+      margin: var(--s-5) 0;
+      width: 100%;
+    }
+    .rule-light {
+      border: 0;
+      border-top: 1px solid var(--rule);
+      margin: var(--s-4) 0;
+      width: 100%;
+    }
+
+    .lede {
+      font-size: var(--t-lede);
+      font-weight: 400;
+      line-height: 1.40;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      max-width: 44ch;
+      text-wrap: pretty;
+    }
+
+    .body-cols {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-4);
+      font-size: var(--t-body);
+      line-height: 1.55;
+      color: var(--ink-2);
+      hyphens: manual;
+      text-wrap: pretty;
+    }
+    .body-cols p {
+      max-width: 42ch;
+      margin-bottom: var(--s-3);
+    }
+    .body-cols p:last-child {
+      margin-bottom: 0;
+    }
+    @media (max-width: 767px) {
+      .body-cols {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .body-single {
+      font-size: var(--t-body);
+      line-height: 1.55;
+      color: var(--ink-2);
+      max-width: 42ch;
+      text-wrap: pretty;
+    }
+
+    .h3-sub {
+      font-size: var(--t-h3);
+      font-weight: 500;
+      line-height: 1.20;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+    }
+
+    .micro-upper {
+      font-size: var(--t-micro);
+      font-weight: 500;
+      line-height: 1.30;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+
+    .mono-meta {
+      font-family: var(--font-mono);
+      font-size: var(--t-micro);
+      font-weight: 400;
+      line-height: 1.35;
+      color: var(--ink-3);
+    }
+
+    /* Controls: Segmented control & chips */
+    .seg-group {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      padding-top: 1px;
+      padding-left: 1px;
+    }
+    .seg-btn {
+      appearance: none;
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--ink);
+      margin: -1px 0 0 -1px;
+      height: 32px;
+      padding: 0 var(--s-3);
+      font-family: var(--font-sans);
+      font-size: var(--t-label);
+      font-weight: 500;
+      line-height: 1;
+      border-radius: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s-1);
+      transition: background-color var(--d-1) var(--ease-std), color var(--d-1) var(--ease-std);
+    }
+    .seg-btn:hover {
+      background: var(--paper-raised);
+    }
+    .seg-btn[aria-pressed="true"] {
+      background: var(--ink);
+      color: var(--paper);
+      position: relative;
+      z-index: 1;
+    }
+    .seg-btn[aria-pressed="true"] .legend-swatch--ink {
+      outline: 1px solid var(--paper);
+    }
+    .seg-btn[aria-pressed="true"] .legend-swatch--hollow {
+      border-color: var(--paper) !important;
+    }
+    @media (pointer: coarse) {
+      .seg-btn {
+        min-height: 44px;
+      }
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s-3);
+      margin-bottom: var(--s-4);
+    }
+
+    /* Figure Caption Block */
+    .fig-caption {
+      margin-top: var(--s-4);
+      padding-top: var(--s-3);
+      border-top: 1px solid var(--rule);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--s-3);
+    }
+    .fig-meta {
+      display: flex;
+      flex-direction: column;
+      gap: var(--s-1);
+      max-width: 58ch;
+    }
+    .fig-text {
+      font-size: var(--t-label);
+      font-weight: 500;
+      line-height: 1.35;
+      color: var(--ink-2);
+    }
+    .fig-table-btn {
+      appearance: none;
+      background: transparent;
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      height: 32px;
+      padding: 0 var(--s-3);
+      font-family: var(--font-sans);
+      font-size: var(--t-label);
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      border-radius: 0;
+    }
+    .fig-table-btn:hover {
+      background: var(--paper-raised);
+    }
+    .fig-table-wrap {
+      margin-top: var(--s-3);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+    .fig-table-wrap[hidden] {
+      display: none;
+    }
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+    @media (max-width: 639px) {
+      .data-table thead th,
+      .data-table tbody td,
+      .data-table tfoot td {
+        padding: var(--s-2) var(--s-2);
+      }
+    }
+
+    /* Tables (shared across figure tables, §4.2 and §4.10) */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--t-label);
+      line-height: 1.35;
+      color: var(--ink);
+    }
+    .data-table thead th {
+      background: var(--paper-raised);
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+      text-align: left;
+      padding: var(--s-2) var(--s-3);
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--ink-2);
+      white-space: nowrap;
+    }
+    .data-table thead th.is-num {
+      text-align: right;
+    }
+    .data-table tbody td,
+    .data-table tfoot td {
+      padding: var(--s-2) var(--s-3);
+      border-bottom: 1px solid var(--rule);
+      vertical-align: middle;
+    }
+    .data-table tbody tr:hover,
+    .data-table tbody tr:focus-within {
+      background: var(--paper-raised);
+    }
+    .data-table tfoot td {
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+      font-weight: 500;
+    }
+    .data-table td.is-num {
+      text-align: right;
+      font-variant-numeric: lining-nums tabular-nums;
+      white-space: nowrap;
+    }
+    .sort-btn {
+      appearance: none;
+      background: transparent;
+      border: 0;
+      padding: var(--s-1) 0;
+      margin: 0;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s-1);
+      min-height: 24px;
+    }
+    .sort-btn:hover {
+      color: var(--ink);
+    }
+    .inline-bar-cell {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--s-2);
+      width: 100%;
+    }
+    .inline-bar-track {
+      width: 56px;
+      height: 4px;
+      background: var(--neutral-data);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .inline-bar-fill {
+      height: 4px;
+      background: var(--violet);
+      display: block;
+    }
+
+    /* Tooltip */
+    #tt {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 500;
+      background: var(--paper-raised);
+      border: 1px solid var(--ink);
+      border-radius: 0;
+      padding: var(--s-2) var(--s-3);
+      max-width: 240px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate3d(0, 4px, 0);
+      transition: opacity var(--d-1) var(--ease-std), transform var(--d-1) var(--ease-std);
+    }
+    #tt.is-visible {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+    #tt[hidden] {
+      display: none;
+    }
+    .tt-cat {
+      font-size: var(--t-micro);
+      font-weight: 500;
+      color: var(--ink-3);
+      margin-bottom: 2px;
+    }
+    .tt-val {
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+    .tt-sub {
+      font-size: var(--t-label);
+      font-weight: 400;
+      line-height: 1.3;
+      color: var(--ink-2);
+    }
+
+    /* §4.1 Hero */
+    .hero-masthead {
+      grid-column: 1 / 13;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--s-3);
+      padding-bottom: var(--s-3);
+      border-bottom: 1px solid var(--rule);
+    }
+    .hero-left {
+      grid-column: 1 / 7;
+      display: flex;
+      flex-direction: column;
+      gap: var(--s-4);
+    }
+    .hero-right {
+      grid-column: 7 / 13;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (max-width: 1023px) {
+      .hero-left, .hero-right {
+        grid-column: 1 / 13;
+      }
+    }
+    .hero-kpi-strip {
+      grid-column: 1 / 13;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--rule);
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: var(--s-4);
+    }
+    .kpi-cell {
+      padding: var(--s-4) var(--s-4) var(--s-4) 0;
+      border-right: 1px solid var(--rule);
+      padding-left: var(--s-4);
+    }
+    .kpi-cell:first-child {
+      padding-left: 0;
+    }
+    .kpi-cell:last-child {
+      border-right: 0;
+    }
+    .kpi-num {
+      font-size: var(--t-kpi);
+      font-weight: 400;
+      line-height: 1.00;
+      letter-spacing: -0.035em;
+      color: var(--ink);
+      display: block;
+      margin-bottom: var(--s-2);
+    }
+    .kpi-cap {
+      font-size: var(--t-label);
+      font-weight: 500;
+      line-height: 1.35;
+      color: var(--ink-2);
+      max-width: 24ch;
+    }
+    .kpi-delta {
+      display: block;
+      margin-top: var(--s-1);
+      font-size: var(--t-label);
+      font-weight: 500;
+      color: var(--violet-ink);
+    }
+    @media (max-width: 767px) {
+      .hero-kpi-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .kpi-cell {
+        padding: var(--s-3);
+        border-bottom: 1px solid var(--rule);
+      }
+      .kpi-cell:nth-child(odd) {
+        padding-left: 0;
+      }
+      .kpi-cell:nth-child(even) {
+        border-right: 0;
+      }
+      .kpi-cell:nth-last-child(-n+2) {
+        border-bottom: 0;
+      }
+    }
+    .scroll-cue {
+      grid-column: 1 / 13;
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--ink-3);
+      margin-top: var(--s-2);
+    }
+
+    /* Hero unit chart */
+    .matrix-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+    .matrix-sq {
+      opacity: 0;
+      transition: transform var(--d-3) var(--ease-in-out), fill var(--d-2) var(--ease-std), opacity var(--d-2) var(--ease-out);
+    }
+    .matrix-svg.is-revealed .matrix-sq {
+      opacity: 1;
+    }
+    .matrix-group-hit {
+      cursor: pointer;
+    }
+    .matrix-group-hit:focus-visible .matrix-group-ring {
+      stroke: var(--violet-ink);
+      stroke-width: 2;
+    }
+
+    /* §4.4 & §4.10 Signature Rotated-Numeral Bars */
+    .spread-04-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--s-6);
+      min-height: 100%;
+    }
+    .limits-lead-stat {
+      padding-bottom: var(--s-5);
+      border-bottom: 1px solid var(--rule);
+    }
+    .limits-lead-num {
+      font-size: var(--t-kpi);
+      font-weight: 400;
+      line-height: 1.00;
+      letter-spacing: -0.035em;
+      color: var(--ink);
+      display: block;
+      margin: var(--s-2) 0;
+    }
+    .evidence-summary-strip {
+      margin-top: var(--s-6);
+      padding-top: var(--s-5);
+      border-top: 1px solid var(--rule);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--s-4);
+    }
+    @media (max-width: 639px) {
+      .evidence-summary-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+    .rot-bars-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .rot-bars-stage {
+      position: relative;
+      height: clamp(320px, 50svh, 460px);
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      align-items: end;
+      border-bottom: 1.5px solid var(--ink);
+    }
+    .rot-bars-stage--outlook {
+      height: clamp(230px, 38svh, 330px);
+      margin-top: var(--s-6);
+    }
+    .rot-bars-stage--outlook .rot-num-text {
+      font-size: clamp(60px, 8.2vw, 148px);
+    }
+    @media (max-width: 767px) {
+      .rot-bars-stage--outlook .rot-num-text {
+        font-size: clamp(56px, 20vw, 96px);
+      }
+    }
+    .rot-bar-btn {
+      appearance: none;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      position: relative;
+      cursor: pointer;
+      display: block;
+      text-align: left;
+    }
+    .rot-bar-btn:focus-visible {
+      outline: 2px solid var(--violet-ink);
+      outline-offset: -2px;
+    }
+    .rot-bar-fill {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 100%;
+      transform-origin: bottom center;
+      transform: scaleY(0);
+      transition: transform var(--d-3) var(--ease-in-out);
+    }
+    .rot-bar-clip {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+      clip-path: inset(calc((1 - var(--bar-ratio, 0)) * 100%) 0 0 0);
+      transition: clip-path var(--d-3) var(--ease-in-out);
+    }
+    .rot-num-anchor {
+      position: absolute;
+      left: 4px;
+      bottom: 8px;
+      width: 0;
+      height: 0;
+      overflow: visible;
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity var(--d-4) var(--ease-out), transform var(--d-4) var(--ease-out);
+    }
+    .is-in .rot-num-anchor {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .rot-num-text {
+      display: inline-block;
+      font-size: var(--t-numeral);
+      font-weight: 400;
+      line-height: 0.78;
+      letter-spacing: -0.045em;
+      color: var(--ink);
+      white-space: nowrap;
+      font-feature-settings: "ss01" 0;
+      font-variant-numeric: lining-nums tabular-nums;
+      transform-origin: 0 0;
+      transform: rotate(-90deg);
+    }
+    .rot-num-text.is-exiting {
+      opacity: 0;
+      transform: rotate(-90deg) translateX(36px);
+      transition: opacity var(--d-2) var(--ease-in-out), transform var(--d-3) var(--ease-in-out);
+    }
+    .rot-num-text.is-entering {
+      opacity: 0;
+      transform: rotate(-90deg) translateX(-36px);
+    }
+    .rot-num-text.is-active {
+      opacity: 1;
+      transform: rotate(-90deg) translateX(0);
+      transition: opacity var(--d-3) var(--ease-out), transform var(--d-3) var(--ease-out);
+    }
+    .rot-bars-labels {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      padding-top: var(--s-2);
+    }
+    .rot-bar-label {
+      font-size: var(--t-label);
+      font-weight: 500;
+      line-height: 1.35;
+      color: var(--ink);
+      padding-right: var(--s-2);
+    }
+
+    /* §4.5 Timeline */
+    .timeline-detail {
+      margin-top: var(--s-6);
+      padding-top: var(--s-4);
+      border-top: 1px solid var(--ink);
+    }
+    .timeline-detail-date {
+      font-family: var(--font-mono);
+      font-size: var(--t-micro);
+      color: var(--violet-ink);
+      margin-bottom: var(--s-1);
+    }
+    .timeline-detail-title {
+      font-size: var(--t-h3);
+      font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      margin-bottom: var(--s-2);
+    }
+    .timeline-detail-body {
+      font-size: var(--t-body);
+      line-height: 1.5;
+      color: var(--ink-2);
+      margin-bottom: var(--s-2);
+      max-width: 42ch;
+    }
+    .timeline-detail-why {
+      font-size: var(--t-label);
+      line-height: 1.45;
+      color: var(--ink);
+      max-width: 46ch;
+    }
+    .timeline-axis-wrap {
+      position: relative;
+      margin-top: var(--s-3);
+    }
+    .tl-mobile-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      margin-top: var(--s-2);
+      border-top: 1px solid var(--rule);
+    }
+    .tl-mobile-btn {
+      appearance: none;
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid var(--rule);
+      border-radius: 0;
+      padding: var(--s-2) var(--s-1);
+      display: grid;
+      grid-template-columns: 12px 66px 1fr;
+      align-items: center;
+      gap: var(--s-2);
+      text-align: left;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      color: var(--ink-2);
+      min-height: 40px;
+    }
+    .tl-mobile-btn[aria-pressed="true"] {
+      color: var(--ink);
+      background: var(--paper-raised);
+    }
+    .tl-mobile-sq {
+      width: 10px;
+      height: 10px;
+      background: var(--ink);
+      display: block;
+    }
+    .tl-mobile-btn[aria-pressed="true"] .tl-mobile-sq {
+      background: var(--vermilion);
+    }
+    .tl-mobile-date {
+      font-family: var(--font-mono);
+      font-size: var(--t-micro);
+      color: var(--ink-3);
+    }
+    .tl-mobile-btn[aria-pressed="true"] .tl-mobile-date {
+      color: var(--violet-ink);
+    }
+    .tl-mobile-title {
+      font-size: var(--t-label);
+      font-weight: 500;
+      line-height: 1.3;
+      color: inherit;
+    }
+
+    /* §4.6 Sticky Scrollytelling */
+    .scrolly-steps {
+      display: flex;
+      flex-direction: column;
+      gap: var(--s-4);
+      margin-top: var(--s-4);
+    }
+    .scrolly-step:first-child {
+      border-top-color: transparent;
+    }
+    .scrolly-step:first-child.is-active {
+      border-top-color: var(--ink);
+    }
+    .scrolly-step {
+      appearance: none;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid var(--rule);
+      padding: var(--s-4) 0;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: var(--s-2);
+      color: var(--ink-3);
+      transition: color var(--d-2) var(--ease-std), border-color var(--d-2) var(--ease-std);
+    }
+    .scrolly-step.is-active {
+      color: var(--ink);
+      border-top-color: var(--ink);
+    }
+    .scrolly-step-title {
+      font-size: var(--t-h3);
+      font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+      color: inherit;
+    }
+    .scrolly-step-body {
+      font-size: var(--t-body);
+      line-height: 1.55;
+      color: inherit;
+      max-width: 42ch;
+    }
+    @media (min-width: 1024px) {
+      .scrolly-step {
+        min-height: 44svh;
+        justify-content: flex-start;
+        padding-top: var(--s-5);
+      }
+      .scrolly-sticky {
+        position: sticky;
+        top: 72px;
+      }
+    }
+    @media (min-width: 768px) and (max-width: 1023px) and (min-height: 700px) {
+      .scrolly-grid-mid {
+        display: grid;
+        grid-template-columns: 5fr 7fr;
+        gap: var(--gutter);
+        align-items: start;
+      }
+      .scrolly-step {
+        min-height: 55svh;
+        justify-content: center;
+      }
+      .scrolly-sticky {
+        position: sticky;
+        top: 72px;
+      }
+    }
+    .scrolly-mobile-tabs {
+      display: none;
+      margin-bottom: var(--s-4);
+    }
+    @media (max-width: 767px), ((min-width: 768px) and (max-width: 1023px) and (max-height: 699px)) {
+      .scrolly-mobile-tabs {
+        display: block;
+      }
+      .scrolly-step {
+        display: none;
+      }
+      .scrolly-step.is-active {
+        display: flex;
+        min-height: auto;
+      }
+    }
+    .legend-chip {
+      appearance: none;
+      background: transparent;
+      border: 1px solid var(--ink);
+      padding: 0 var(--s-2);
+      height: 28px;
+      font-family: var(--font-sans);
+      font-size: var(--t-micro);
+      font-weight: 500;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      border-radius: 0;
+    }
+    .legend-chip[aria-pressed="false"] {
+      opacity: 0.45;
+      border-color: var(--ink-3);
+    }
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    /* §4.7 Heatmap */
+    .heatmap-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+    .heatmap-table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: separate;
+      border-spacing: 2px;
+    }
+    .heatmap-table th {
+      font-size: var(--t-micro);
+      font-weight: 500;
+      color: var(--ink-2);
+      text-align: center;
+      padding: var(--s-2) var(--s-1);
+      vertical-align: bottom;
+    }
+    .heatmap-table th.hm-sector-col {
+      text-align: left;
+      width: 240px;
+      padding-left: 0;
+    }
+    .heatmap-table th.hm-global-col,
+    .heatmap-table td.hm-global-col {
+      border-left: 1px solid var(--ink);
+      padding-left: 10px;
+    }
+    .hm-row-label {
+      font-size: var(--t-label);
+      font-weight: 500;
+      color: var(--ink);
+      text-align: left;
+      padding: var(--s-1) var(--s-3) var(--s-1) 0;
+      white-space: nowrap;
+      background: var(--paper);
+    }
+    .hm-mobile-cue {
+      display: none;
+      margin-top: var(--s-2);
+    }
+    @media (max-width: 767px) {
+      .heatmap-table {
+        min-width: 540px;
+      }
+      .heatmap-table th.hm-sector-col {
+        position: sticky;
+        left: 0;
+        z-index: 3;
+        background: var(--paper);
+      }
+      .hm-row-label {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+      }
+      .heatmap-table th.hm-sector-col,
+      .hm-row-label {
+        width: 136px;
+        min-width: 132px;
+        max-width: 145px;
+        white-space: normal;
+        font-size: 12px;
+        line-height: 1.25;
+        padding-right: var(--s-2);
+        box-shadow: 1px 0 0 var(--rule);
+      }
+      .hm-mobile-cue {
+        display: block;
+      }
+    }
+    .hm-cell-btn {
+      width: 100%;
+      min-height: 40px;
+      border: 0;
+      font-family: var(--font-sans);
+      font-size: var(--t-label);
+      font-weight: 500;
+      font-variant-numeric: lining-nums tabular-nums;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0;
+      transition: opacity var(--d-1) var(--ease-std);
+    }
+    .hm-cell-btn.is-dim {
+      opacity: 0.35;
+    }
+    .hm-cell-btn.is-below {
+      background: var(--neutral-data) !important;
+      color: var(--ink) !important;
+    }
+    .hm-ramp {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--s-2);
+      margin-top: var(--s-3);
+    }
+    .hm-ramp-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--t-micro);
+      color: var(--ink-2);
+    }
+    .hm-ramp-box {
+      width: 16px;
+      height: 12px;
+      display: inline-block;
+    }
+
+    /* Sliders & inputs */
+    .range-control {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s-2);
+      font-size: var(--t-label);
+      font-weight: 500;
+      color: var(--ink);
+    }
+    .range-control input[type="range"] {
+      accent-color: var(--violet-ink);
+      width: 140px;
+      cursor: pointer;
+    }
+    .text-input {
+      height: 32px;
+      padding: 0 var(--s-3);
+      border: 1px solid var(--ink);
+      background: var(--paper-raised);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: var(--t-label);
+      border-radius: 0;
+      min-width: 210px;
+    }
+    @media (max-width: 639px) {
+      .text-input {
+        width: 100%;
+        min-width: 0;
+      }
+    }
+    .check-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--t-label);
+      font-weight: 500;
+      color: var(--ink);
+      cursor: pointer;
+      min-height: 32px;
+    }
+    .check-control input {
+      accent-color: var(--violet-ink);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* §4.8 Waffle + Rotated stat */
+    .waffle-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--s-5);
+      align-items: end;
+      margin-top: var(--s-3);
+    }
+    @media (max-width: 540px) {
+      .waffle-stage {
+        grid-template-columns: 1fr;
+      }
+      .waffle-rot-frame {
+        height: clamp(120px, 32vw, 160px);
+      }
+    }
+    .waffle-stat-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--s-2);
+      min-width: 140px;
+    }
+    .waffle-rot-frame {
+      position: relative;
+      height: clamp(190px, 26vw, 270px);
+      width: 100%;
+    }
+    .waffle-rot-frame .rot-num-anchor {
+      left: 0;
+      bottom: 8px;
+      width: 0;
+      height: 0;
+      overflow: visible;
+      opacity: 1;
+      transform: none;
+    }
+
+    /* §4.10 Market table sticky wrapper */
+    .market-table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      max-height: 72vh;
+      overflow-y: auto;
+      border-bottom: 1px solid var(--rule);
+    }
+    .market-table-scroll thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+    }
+    @media (max-width: 767px) {
+      .market-table-scroll tbody td:first-child,
+      .market-table-scroll thead th:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: var(--paper);
+        max-width: 134px;
+        white-space: normal;
+        line-height: 1.25;
+        box-shadow: 1px 0 0 var(--rule);
+      }
+      .market-table-scroll tbody tr:hover td:first-child,
+      .market-table-scroll tbody tr:focus-within td:first-child {
+        background: var(--paper-raised);
+      }
+      .market-table-scroll thead th:first-child {
+        z-index: 4;
+        background: var(--paper-raised);
+      }
+    }
+    .empty-state {
+      padding: var(--s-6) var(--s-4);
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s-3);
+      font-size: var(--t-body);
+      color: var(--ink-2);
+    }
+
+    .ml-select {
+      height: 32px;
+      padding: 0 var(--s-3);
+      border: 1px solid var(--ink);
+      background: var(--paper-raised);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: var(--t-label);
+      border-radius: 0;
+      cursor: pointer;
+    }
+    .ml-kpi-row {
+      margin-top: var(--s-5);
+      padding-top: var(--s-4);
+      border-top: 1px solid var(--rule);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--s-4);
+    }
+    @media (max-width: 639px) {
+      .ml-kpi-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    .ml-quad-persuadable {
+      color: var(--violet-ink);
+      font-weight: 500;
+    }
+    .ml-quad-high {
+      color: var(--vermilion-ink);
+      font-weight: 500;
+    }
+    .ml-quad-base {
+      color: var(--ink-2);
+    }
+
+    /* §12 Causal PSM & Rosenbaum Sensitivity */
+    .psm-kpi-row {
+      margin-top: var(--s-5);
+      padding-top: var(--s-4);
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: var(--s-4);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-4);
+    }
+    @media (max-width: 639px) {
+      .psm-kpi-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    .psm-tables-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: var(--s-5);
+      align-items: start;
+    }
+    @media (max-width: 1023px) {
+      .psm-tables-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .psm-citations-block {
+      margin-top: var(--s-6);
+      padding-top: var(--s-5);
+      border-top: 1px solid var(--ink);
+    }
+    .psm-citations-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-4) var(--s-5);
+      margin-top: var(--s-3);
+    }
+    @media (max-width: 767px) {
+      .psm-citations-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .psm-cite-item {
+      border-top: 1px solid var(--rule);
+      padding-top: var(--s-3);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .psm-cite-head {
+      font-size: var(--t-label);
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+    .psm-cite-venue {
+      font-family: var(--font-mono);
+      font-size: var(--t-micro);
+      color: var(--violet-ink);
+    }
+    .psm-cite-note {
+      font-size: var(--t-label);
+      line-height: 1.45;
+      color: var(--ink-2);
+    }
+    .psm-takeaway-block {
+      margin-bottom: var(--s-6);
+      padding-bottom: var(--s-5);
+      border-bottom: 1px solid var(--rule);
+    }
+    .psm-takeaway-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--s-5);
+      margin-top: var(--s-3);
+    }
+    @media (max-width: 1023px) {
+      .psm-takeaway-grid {
+        grid-template-columns: 1fr;
+        gap: var(--s-4);
+      }
+    }
+    .psm-takeaway-col {
+      border-top: 1px solid var(--rule);
+      padding-top: var(--s-3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--s-2);
+    }
+    .psm-takeaway-title {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.3;
+      color: var(--ink);
+    }
+    .psm-takeaway-body {
+      font-size: var(--t-label);
+      line-height: 1.55;
+      color: var(--ink-2);
+    }
+
+    /* Footer / Colophon */
+    .colophon {
+      padding: var(--s-8) 0 var(--s-9);
+    }
+    .colophon-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--s-5);
+      padding-top: var(--s-6);
+      border-top: 1px solid var(--ink);
+    }
+    @media (max-width: 1023px) {
+      .colophon-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 639px) {
+      .colophon-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .colophon-col {
+      display: flex;
+      flex-direction: column;
+      gap: var(--s-2);
+      font-size: var(--t-label);
+      line-height: 1.45;
+      color: var(--ink-2);
+    }
+    .colophon-bottom {
+      margin-top: var(--s-6);
+      padding-top: var(--s-4);
+      border-top: 1px solid var(--rule);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s-3);
+    }
+    .back-top {
+      font-size: var(--t-label);
+      font-weight: 500;
+      color: var(--violet-ink);
+      text-decoration: none;
+    }
+    .back-top:hover {
+      text-decoration: underline;
+    }
+
+    /* Generic SVG text styling */
+    svg text {
+      font-family: var(--font-sans);
+      fill: var(--ink);
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    svg text.svg-micro {
+      font-size: 11px;
+      font-weight: 500;
+      fill: var(--ink-3);
+    }
+    svg text.svg-label {
+      font-size: 13px;
+      font-weight: 500;
+      fill: var(--ink);
+    }
+
+    /* Theme Sidebar (<dialog id="themePanel">) */
+    dialog.theme-panel {
+      position: fixed;
+      inset: 0 0 0 auto;
+      width: 400px;
+      max-width: 100vw;
+      height: 100dvh;
+      max-height: none;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-left: 1px solid var(--ink);
+      border-radius: 0;
+      background: var(--paper-raised);
+      color: var(--ink);
+      overflow: hidden;
+      transform: translateX(100%);
+      transition: transform 220ms var(--ease-in-out);
+    }
+    dialog.theme-panel.is-open {
+      transform: translateX(0);
+      transition-duration: 320ms;
+      transition-timing-function: var(--ease-out);
+    }
+    dialog.theme-panel::backdrop {
+      background: var(--scrim);
+      opacity: 0;
+      transition: opacity 220ms var(--ease-in-out);
+    }
+    dialog.theme-panel.is-open::backdrop {
+      opacity: 1;
+      transition-duration: 320ms;
+      transition-timing-function: var(--ease-out);
+    }
+    @media (min-width: 1024px) and (max-width: 1279px) {
+      dialog.theme-panel { width: 380px; }
+    }
+    @media (min-width: 768px) and (max-width: 1023px) {
+      dialog.theme-panel { width: 360px; }
+    }
+    @media (max-width: 767px) {
+      dialog.theme-panel {
+        width: 100vw;
+        border-left: 0;
+      }
+    }
+    .theme-panel-inner {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+    .theme-panel-band {
+      height: 40px;
+      flex-shrink: 0;
+      background: var(--band);
+      color: var(--white);
+      padding: 0 var(--s-4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s-3);
+    }
+    .theme-panel-band :focus-visible {
+      outline: 2px solid var(--white);
+      outline-offset: 2px;
+    }
+    .theme-panel-band-left {
+      display: flex;
+      align-items: center;
+      gap: var(--s-3);
+      min-width: 0;
+    }
+    .theme-panel-band-left h2 {
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+      color: var(--white);
+    }
+    .theme-panel-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: var(--s-4);
+    }
+    .theme-panel-lede {
+      font-size: var(--t-label);
+      line-height: 1.45;
+      color: var(--ink-2);
+      margin-top: var(--s-1);
+      margin-bottom: var(--s-4);
+    }
+    .theme-list {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      border-top: 1px solid var(--rule);
+    }
+    .theme-opt {
+      display: block;
+      position: relative;
+      margin: 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .theme-radio {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .theme-opt-body {
+      display: grid;
+      grid-template-columns: 88px 1fr 16px;
+      gap: var(--s-3);
+      align-items: center;
+      padding: var(--s-3) var(--s-1);
+      cursor: pointer;
+    }
+    .theme-opt:hover .theme-opt-name {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .theme-radio:focus-visible + .theme-opt-body {
+      outline: 2px solid var(--violet-ink);
+      outline-offset: 4px;
+    }
+    .theme-opt-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .theme-opt-name {
+      font-size: var(--t-body);
+      font-weight: 500;
+      line-height: 1.3;
+      color: var(--ink);
+    }
+    .theme-opt-desc {
+      font-size: var(--t-label);
+      line-height: 1.4;
+      color: var(--ink-2);
+    }
+    .theme-opt-mark {
+      width: 10px;
+      height: 10px;
+      border: 1px solid var(--ink-3);
+      background: transparent;
+      justify-self: end;
+    }
+    .theme-radio:checked + .theme-opt-body .theme-opt-mark {
+      border-color: var(--ink);
+      background: var(--ink);
+    }
+    .theme-radio:checked + .theme-opt-body .theme-opt-name {
+      font-weight: 600;
+    }
+    .theme-radio:checked + .theme-opt-body .theme-swatch {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    /* CSS-drawn 88x60 theme swatch card */
+    .theme-swatch {
+      width: 88px;
+      height: 60px;
+      display: grid;
+      grid-template-rows: 10px 1fr 8px;
+      background: var(--paper);
+      border: 1px solid var(--ink);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sw-band {
+      background: var(--band);
+      display: flex;
+      align-items: center;
+      padding: 0 5px;
+    }
+    .sw-band::before {
+      content: "";
+      width: 30%;
+      height: 2px;
+      background: var(--white);
+      display: block;
+    }
+    .sw-mid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      padding: 6px 6px 0;
+      gap: 6px;
+    }
+    .sw-line {
+      align-self: start;
+      margin-top: 2px;
+      width: 75%;
+      height: 3px;
+      background: var(--ink);
+    }
+    .sw-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 100%;
+    }
+    .sw-bars i {
+      display: block;
+      width: 8px;
+      font-style: normal;
+    }
+    .sw-bars i:nth-child(1) { height: 70%; background: var(--violet); }
+    .sw-bars i:nth-child(2) { height: 48%; background: var(--vermilion); }
+    .sw-bars i:nth-child(3) { height: 30%; background: var(--magenta); }
+    .sw-ramp {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      height: 8px;
+    }
+    .sw-ramp i { display: block; font-style: normal; }
+    .sw-ramp i:nth-child(1) { background: var(--violet-100); }
+    .sw-ramp i:nth-child(2) { background: var(--violet-200); }
+    .sw-ramp i:nth-child(3) { background: var(--violet-300); }
+    .sw-ramp i:nth-child(4) { background: var(--violet-400); }
+    .sw-ramp i:nth-child(5) { background: var(--violet-500); }
+    .sw-ramp i:nth-child(6) { background: var(--violet-600); }
+
+    .theme-panel-footer {
+      flex-shrink: 0;
+      border-top: 1px solid var(--ink);
+      padding: var(--s-3) var(--s-4);
+      background: var(--paper-raised);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s-3);
+    }
+    .seg-btn[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+      border-color: var(--ink-3);
+      color: var(--ink-3);
+    }
+    .seg-btn[disabled]:hover {
+      background: transparent;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation-duration: 0ms !important;
+      }
+      dialog.theme-panel,
+      dialog.theme-panel::backdrop {
+        transform: none !important;
+        transition-property: opacity !important;
+        transition-duration: var(--d-1) !important;
+      }
+      dialog.theme-panel:not(.is-open) {
+        opacity: 0;
+      }
+      dialog.theme-panel.is-open {
+        opacity: 1;
+      }
+      .line-inner {
+        transform: translateY(0) !important;
+        transition: none !important;
+      }
+      .rot-bar-fill,
+      .rot-num-anchor,
+      .rot-num-text,
+      .matrix-sq,
+      .pager-circle,
+      .band-running {
+        transition-duration: 120ms !important;
+      }
+      .rot-num-anchor {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .matrix-sq {
+        opacity: 1 !important;
+      }
+      .rot-bar-fill {
+        transition: transform 120ms linear !important;
+      }
+    }
+
+    /* Executive Summary Report Dialog & Print Brief */
+    dialog.report-dialog {
+      width: min(920px, calc(100vw - 24px));
+      max-width: 920px;
+      height: min(88dvh, 860px);
+      max-height: 92dvh;
+      margin: auto;
+      padding: 0;
+      border: 1px solid var(--ink);
+      border-radius: 0;
+      background: var(--paper-raised);
+      color: var(--ink);
+      overflow: hidden;
+    }
+    dialog.report-dialog::backdrop {
+      background: var(--scrim);
+    }
+    .report-dialog-inner {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+    .report-dialog-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: var(--s-5);
+      background: var(--paper);
+    }
+    .report-sheet {
+      background: #FFFFFF;
+      color: #121116;
+      border: 1px solid #C9C5D4;
+      padding: var(--s-6);
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    @media (max-width: 639px) {
+      .report-dialog-body {
+        padding: var(--s-3);
+      }
+      .report-sheet {
+        padding: var(--s-4);
+      }
+    }
+    .report-band-head {
+      background: #6C50F6;
+      color: #FFFFFF;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: var(--s-4);
+    }
+    .report-title {
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #121116;
+      margin-bottom: 6px;
+    }
+    .report-sub {
+      font-size: 13px;
+      font-weight: 500;
+      color: #5A3BE6;
+      margin-bottom: 6px;
+    }
+    .report-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #4A4752;
+      padding-bottom: var(--s-3);
+      border-bottom: 1.5px solid #121116;
+      margin-bottom: var(--s-4);
+    }
+    .report-sec-kicker {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #5A3BE6;
+      margin-top: var(--s-5);
+      margin-bottom: 4px;
+      display: block;
+    }
+    .report-sec-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #121116;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #121116;
+      margin-bottom: var(--s-3);
+    }
+    .report-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: var(--s-4);
+      break-inside: avoid;
+    }
+    @media (max-width: 639px) {
+      .report-kpi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .report-kpi-box {
+      background: #F4F3F8;
+      border: 1px solid #C9C5D4;
+      padding: 10px 12px;
+    }
+    .report-kpi-lbl {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #625F6B;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .report-kpi-val {
+      font-size: 20px;
+      font-weight: 500;
+      color: #121116;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .report-kpi-note {
+      font-size: 11.5px;
+      line-height: 1.35;
+      color: #4A4752;
+    }
+    .report-takeaway-item {
+      border-top: 1px solid #D8D4E2;
+      padding-top: 10px;
+      margin-bottom: 12px;
+      break-inside: avoid;
+    }
+    .report-takeaway-item h4 {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #121116;
+      margin-bottom: 4px;
+    }
+    .report-takeaway-item p {
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #36343D;
+    }
+    .report-table-wrap {
+      margin-bottom: var(--s-4);
+      overflow-x: auto;
+      break-inside: avoid;
+    }
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      color: #121116;
+    }
+    .report-table th {
+      background: #F4F3F8;
+      border-top: 1px solid #121116;
+      border-bottom: 1px solid #121116;
+      text-align: left;
+      padding: 6px 8px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #4A4752;
+    }
+    .report-table th.is-num,
+    .report-table td.is-num {
+      text-align: right;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    .report-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #D8D4E2;
+    }
+    .report-cite-item {
+      border-top: 1px solid #D8D4E2;
+      padding-top: 8px;
+      margin-bottom: 8px;
+      break-inside: avoid;
+    }
+    .report-cite-item strong {
+      display: block;
+      font-size: 12px;
+      color: #121116;
+    }
+    .report-cite-item span {
+      display: block;
+      font-size: 11.5px;
+      line-height: 1.4;
+      color: #4A4752;
+      margin-top: 2px;
+    }
+
+    .print-report-mount {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: letter;
+        margin: 12mm 14mm;
+      }
+      body {
+        background: #FFFFFF !important;
+        color: #121116 !important;
+      }
+      .band,
+      .pager-dropdown,
+      .grid-overlay,
+      main,
+      footer.colophon,
+      dialog,
+      #tt,
+      .skip-link,
+      #liveRegion {
+        display: none !important;
+      }
+      #printReportMount.print-report-mount {
+        display: block !important;
+      }
+      .report-sheet {
+        border: 0 !important;
+        padding: 0 !important;
+        max-width: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="band" role="banner">
+    <div class="band-inner">
+      <div class="band-left">
+        <span class="band-folio num" id="bandFolioLeft">002</span>
+        <span class="band-running" id="bandTitle">Overview</span>
+      </div>
+      <div class="band-logo-wrap" aria-hidden="true">
+        <span class="logotype logotype--band">
+          <span class="logotype-brand">folio</span><span class="logotype-rule"></span><span class="logotype-title">Telco Churn</span><span class="logotype-year">7,043</span>
+        </span>
+      </div>
+      <div class="band-right">
+        <nav class="pager-nav" aria-label="Sections" aria-keyshortcuts="j k 1 2 3 4 5 6 7 8 9 0 g Escape">
+          <span class="pager-label">Section</span>
+          <ol class="pager-list pager-desktop" id="pagerList">
+            <span class="pager-circle" id="pagerCircle" aria-hidden="true"></span>
+            <li><a class="pager-link" href="#s01" data-sec="0" aria-label="Section 1: Overview" aria-current="true">01</a></li>
+            <li><a class="pager-link" href="#s02" data-sec="1" aria-label="Section 2: Contracts">02</a></li>
+            <li><a class="pager-link" href="#s03" data-sec="2" aria-label="Section 3: Drivers">03</a></li>
+            <li><a class="pager-link" href="#s04" data-sec="3" aria-label="Section 4: Service Mix">04</a></li>
+            <li><a class="pager-link" href="#s05" data-sec="4" aria-label="Section 5: Tenure Curve">05</a></li>
+            <li><a class="pager-link" href="#s06" data-sec="5" aria-label="Section 6: MRR Cohorts">06</a></li>
+            <li><a class="pager-link" href="#s07" data-sec="6" aria-label="Section 7: Risk Heatmap">07</a></li>
+            <li><a class="pager-link" href="#s08" data-sec="7" aria-label="Section 8: Retention Split">08</a></li>
+            <li><a class="pager-link" href="#s09" data-sec="8" aria-label="Section 9: Tenure OLS">09</a></li>
+            <li><a class="pager-link" href="#s10" data-sec="9" aria-label="Section 10: Segment Index">10</a></li>
+            <li><a class="pager-link" href="#s11" data-sec="10" aria-label="Section 11: ML &amp; Uplift">11</a></li>
+            <li><a class="pager-link" href="#s12" data-sec="11" aria-label="Section 12: PSM Study">12</a></li>
+          </ol>
+          <div class="pager-mobile">
+            <button type="button" class="pager-step" id="pagerPrev" aria-label="Previous section">←</button>
+            <button type="button" class="pager-toggle" id="pagerToggle" aria-expanded="false" aria-controls="pagerMenu">
+              Section <span class="num" id="pagerMobileNum">01</span> / 12
+            </button>
+            <button type="button" class="pager-step" id="pagerNext" aria-label="Next section">→</button>
+          </div>
+        </nav>
+        <span class="band-folio num" id="bandFolioRight">003</span>
+        <span class="band-sep" aria-hidden="true"></span>
+        <button type="button" class="band-btn" id="themePanelBtn" aria-expanded="false" aria-controls="themePanel" aria-haspopup="dialog">
+          <span class="band-btn-glyph" aria-hidden="true"></span>
+          <span class="band-btn-label">Control panel</span>
+        </button>
+      </div>
+    </div>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  </header>
+
+  <div class="pager-dropdown" id="pagerMenu" hidden>
+    <ol id="pagerDropdownList"></ol>
+  </div>
+
+  <div class="grid-overlay" id="gridOverlay" aria-hidden="true">
+    <div class="grid-overlay-inner">
+      <div class="grid-overlay-col"></div><div class="grid-overlay-col"></div>
+      <div class="grid-overlay-col"></div><div class="grid-overlay-col"></div>
+      <div class="grid-overlay-col"></div><div class="grid-overlay-col"></div>
+      <div class="grid-overlay-col"></div><div class="grid-overlay-col"></div>
+      <div class="grid-overlay-col"></div><div class="grid-overlay-col"></div>
+      <div class="grid-overlay-col"></div><div class="grid-overlay-col"></div>
+    </div>
+  </div>
+
+  <main id="main">
+    <!-- SECTION 01: OVERVIEW (HERO) -->
+    <section class="spread" id="s01" aria-labelledby="h01" data-sec-index="0" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="hero-masthead">
+            <span class="logotype logotype--hero">
+              <span class="logotype-brand">folio</span><span class="logotype-rule"></span><span class="logotype-title">Telco Customer Churn</span><span class="logotype-year">7,043 accounts</span>
+            </span>
+            <span class="micro-upper" style="color:var(--ink-3);" id="heroMetaSub">Subscriber Retention Study · 7,043 Accounts · 21 Attributes · Source CSV Parsed Live</span>
+          </div>
+
+          <div class="hero-left">
+            <div>
+              <p class="kicker">01 — Portfolio Overview</p>
+              <h1 class="headline-display" id="h01" tabindex="-1">
+                <span class="line"><span class="line-inner">Why telecom</span></span>
+                <span class="line"><span class="line-inner">subscribers leave,</span></span>
+                <span class="line"><span class="line-inner">and who stays.</span></span>
+              </h1>
+            </div>
+            <hr class="rule-strong" style="margin:0;">
+            <p class="lede" id="heroLede">
+              Across 7,043 customer accounts in the Telco Customer Churn dataset, 26.5% churned—putting $139.1k in monthly recurring charges at risk. Disaggregate the subscriber base by churn outcome, contract term, or internet tier in the live unit matrix opposite.
+            </p>
+          </div>
+
+          <div class="hero-right">
+            <div class="controls-row">
+              <span class="h3-sub" id="matrixBasisSub" style="font-size:15px;">Unit matrix chart, 1 square ≈ 20 customer accounts</span>
+              <div style="display:flex;flex-wrap:wrap;gap:var(--s-2);align-items:center;">
+                <div class="seg-group" role="group" aria-label="Unit matrix metric basis">
+                  <button type="button" class="seg-btn" data-matrix-basis="volume" aria-pressed="true">Volume (n)</button>
+                  <button type="button" class="seg-btn" data-matrix-basis="value" aria-pressed="false">Value (MRR)</button>
+                </div>
+                <div class="seg-group" role="group" aria-label="Group customer accounts by">
+                  <button type="button" class="seg-btn" data-matrix-mode="all" aria-pressed="true">All</button>
+                  <button type="button" class="seg-btn" data-matrix-mode="churn" aria-pressed="false">Churn</button>
+                  <button type="button" class="seg-btn" data-matrix-mode="contract" aria-pressed="false">Contract</button>
+                  <button type="button" class="seg-btn" data-matrix-mode="internet" aria-pressed="false">Internet</button>
+                </div>
+              </div>
+            </div>
+            <div id="chart01"></div>
+            <div id="cap01"></div>
+          </div>
+
+          <div class="hero-kpi-strip" aria-label="Headline Telco churn metrics">
+            <div class="kpi-cell">
+              <span class="kpi-num num" id="kpiTotalNum" data-countup="7043" data-decimals="0" aria-label="7043">7,043</span>
+              <span class="kpi-cap">total telecom customer accounts parsed from source CSV</span>
+            </div>
+            <div class="kpi-cell">
+              <span class="kpi-num num" aria-label="26.5%"><span id="kpiChurnRateNum" data-countup="26.5" data-decimals="1">26.5</span>%</span>
+              <span class="kpi-cap" id="kpiChurnCap">overall subscriber churn rate (1,869 churned vs 5,174 retained)</span>
+            </div>
+            <div class="kpi-cell">
+              <span class="kpi-num num" aria-label="$139.1k">$<span id="kpiMrrNum" data-countup="139.1" data-decimals="1">139.1</span>k</span>
+              <span class="kpi-cap" id="kpiMrrCap">MRR lost to churn (30.5% of $456.1k MRR · $74.4 vs $61.3 avg)</span>
+            </div>
+            <div class="kpi-cell">
+              <span class="kpi-num num" aria-label="18.0 mo"><span id="kpiTenureNum" data-countup="18.0" data-decimals="1">18.0</span> mo</span>
+              <span class="kpi-cap" id="kpiTenureCap">mean tenure of churned accounts (retained average: 37.6 mo)</span>
+              <span class="kpi-delta num" id="kpiTenureDelta">↓ 19.6 mo</span>
+            </div>
+          </div>
+
+          <p class="scroll-cue">Scroll, or press J / K to explore all 12 churn, ML &amp; causal study spreads ↓</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 02: CONTRACT BREAKDOWN & SUMMARY TABLE (chart left, text right) -->
+    <section class="spread spread--spined" id="s02" aria-labelledby="h02" data-sec-index="1" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="page-left">
+            <h3 class="h3-sub" style="margin-bottom:var(--s-3);">Portfolio composition by contract &amp; churn outcome (100%)</h3>
+            <div id="chart02a"></div>
+            <div id="cap02a"></div>
+
+            <h3 class="h3-sub" style="margin-top:var(--s-6);margin-bottom:var(--s-3);">Sortable contract tier breakdown</h3>
+            <div id="chart02b"></div>
+            <div id="cap02b"></div>
+          </div>
+
+          <div class="page-right page-headline-first">
+            <p class="kicker">02 — Contract structure &amp; churn</p>
+            <h2 class="headline-h2" id="h02" tabindex="-1">
+              <span class="line"><span class="line-inner">Month-to-month</span></span>
+              <span class="line"><span class="line-inner">contracts drive 89%</span></span>
+              <span class="line"><span class="line-inner">of total churn.</span></span>
+            </h2>
+            <hr class="rule-strong">
+            <div class="body-cols">
+              <div>
+                <p>Month-to-month agreements represent 55.0% of all subscribers (3,875 accounts), yet generate 1,655 of the dataset’s 1,869 exits—a 42.7% churn rate that exposes $120.8k in monthly billing.</p>
+                <p>Churned subscribers also skew toward higher monthly bills ($74.40/mo vs $61.30 retained), pushing <strong>churn value</strong> (30.5% of total MRR) four points higher than <strong>churn volume</strong> (26.5% of accounts).</p>
+              </div>
+              <div>
+                <p>Hover or focus any contract row in the sortable summary table opposite to highlight matching customer squares inside the Section 01 unit matrix when grouped by contract term.</p>
+                <p>Below, paired bars contrast each segment’s share of churned headcount against its share of lost recurring dollars—exposing how Fiber optic and $70+/mo tiers drive over 80% of churn value.</p>
+              </div>
+            </div>
+
+            <div style="margin-top:var(--s-6);padding-top:var(--s-5);border-top:1px solid var(--rule);">
+              <div class="controls-row">
+                <h3 class="h3-sub" style="font-size:15px;">Churn Value (% of $139.1k MRR) vs. Churn Volume (% of 1,869 exits)</h3>
+                <div class="seg-group" role="group" aria-label="Slice churn value vs volume by">
+                  <button type="button" class="seg-btn" data-vv-dim="internet" aria-pressed="true">Internet tier</button>
+                  <button type="button" class="seg-btn" data-vv-dim="spend" aria-pressed="false">Spend tier</button>
+                  <button type="button" class="seg-btn" data-vv-dim="contract" aria-pressed="false">Contract</button>
+                </div>
+              </div>
+              <div id="chart02v"></div>
+              <div id="cap02v"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 03: CHURNED VS RETAINED DRIVER COMPARISON (text left, chart right) -->
+    <section class="spread spread--spined" id="s03" aria-labelledby="h03" data-sec-index="2" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="page-left">
+            <p class="kicker">03 — Churn driver gap</p>
+            <h2 class="headline-h2" id="h03" tabindex="-1">
+              <span class="line"><span class="line-inner">What separates</span></span>
+              <span class="line"><span class="line-inner">churned accounts</span></span>
+              <span class="line"><span class="line-inner">from retained ones.</span></span>
+            </h2>
+            <hr class="rule-strong">
+            <div class="body-cols">
+              <div>
+                <p>Comparing attribute prevalence between retained subscribers (hollow circles, n = 5,174) and churned accounts (filled dots, n = 1,869) isolates the strongest structural signals across all 21 CSV columns.</p>
+                <p>Nearly nine in ten churned customers were on month-to-month contracts (89% vs 43% retained, +46 pp), and roughly four in five lacked online security (78% vs 39%) or technical support add-ons (77% vs 39%).</p>
+              </div>
+              <div>
+                <p>Signal ink highlights elevated risk attributes—led by fiber optic service (+34 pp), electronic check billing (+32 pp), and paperless billing (+21 pp). Accent ink marks protective anchors like two-year terms (−29 pp).</p>
+                <p>Use the sort buttons opposite to rank drivers by prevalence among churned users, absolute risk gap, or retained share.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-right">
+            <div class="controls-row">
+              <span class="h3-sub" style="font-size:15px;">% attribute share: Retained (n = 5,174) vs Churned (n = 1,869)</span>
+              <div class="seg-group" role="group" aria-label="Sort churn drivers by">
+                <button type="button" class="seg-btn" data-dumb-sort="churned" aria-pressed="true">By churned</button>
+                <button type="button" class="seg-btn" data-dumb-sort="delta" aria-pressed="false">By gap</button>
+                <button type="button" class="seg-btn" data-dumb-sort="retained" aria-pressed="false">By retained</button>
+              </div>
+            </div>
+            <div id="chart03"></div>
+            <div id="cap03"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 04: CONTRACT MIX BY INTERNET SERVICE (SIGNATURE SPREAD) -->
+    <section class="spread spread--spined" id="s04" aria-labelledby="h04" data-sec-index="3" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="page-left spread-04-left">
+            <div class="limits-lead-stat" id="limitsLeadStat">
+              <span class="micro-upper" id="limitsLeadKicker">Contract Mix · All Accounts (n = 7,043)</span>
+              <span class="limits-lead-num num" id="limitsLeadNum">55 %</span>
+              <p class="lede" id="limitsLeadCap" style="max-width:34ch;">held month-to-month contracts across All Accounts (churn rate 26.5%), while 21 % held one-year and 24 % two-year terms.</p>
+            </div>
+            <div>
+            <hr class="rule-strong" style="margin-top:0;">
+            <div class="body-cols">
+              <div>
+                <p>Contract structure varies sharply by internet infrastructure tier. Among the 3,096 Fiber optic subscribers, 69% sit on flexible month-to-month terms—helping explain Fiber’s 41.9% overall churn rate.</p>
+                <p>Conversely, 42% of phone-only subscribers without internet service hold two-year contracts, sustaining a 7.4% churn rate across 1,526 accounts.</p>
+              </div>
+              <div>
+                <p>Selecting any service tier opposite animates the vertical rotated-numeral KPI bars, updates the live screen-reader summary, and pairs with exact n-counts in tooltips.</p>
+                <p>DSL subscribers split more evenly (51% month-to-month, 24% one-year, 25% two-year), holding attrition at 19.0%.</p>
+              </div>
+            </div>
+            </div>
+          </div>
+
+          <div class="page-right page-headline-first">
+            <p class="kicker">04 — Contract mix by service tier</p>
+            <h2 class="headline-h2" id="h04" tabindex="-1">
+              <span class="line"><span class="line-inner">Fiber subscribers</span></span>
+              <span class="line"><span class="line-inner">skew heavily toward</span></span>
+              <span class="line"><span class="line-inner">short-term risk.</span></span>
+            </h2>
+            <hr class="rule-strong">
+            <div class="controls-row">
+              <div class="seg-group" role="group" aria-label="Filter contract mix by internet service">
+                <button type="button" class="seg-btn" data-limit-region="All Accounts" aria-pressed="true">All Accounts</button>
+                <button type="button" class="seg-btn" data-limit-region="Fiber optic" aria-pressed="false">Fiber optic</button>
+                <button type="button" class="seg-btn" data-limit-region="DSL" aria-pressed="false">DSL</button>
+                <button type="button" class="seg-btn" data-limit-region="No internet" aria-pressed="false">No internet</button>
+              </div>
+            </div>
+            <p class="sr-only" id="limitsLive" aria-live="polite">All Accounts: 55 % month-to-month, 21 % one year, 24 % two year.</p>
+            <div id="chart04"></div>
+            <div id="cap04"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 05: TENURE HAZARD CURVE & MILESTONES (text left, chart right) -->
+    <section class="spread spread--spined" id="s05" aria-labelledby="h05" data-sec-index="4" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="page-left">
+            <p class="kicker">05 — Tenure hazard curve</p>
+            <h2 class="headline-h2" id="h05" tabindex="-1">
+              <span class="line"><span class="line-inner">Churn drops from</span></span>
+              <span class="line"><span class="line-inner">53% at onboarding</span></span>
+              <span class="line"><span class="line-inner">to 7% by year six.</span></span>
+            </h2>
+            <hr class="rule-strong">
+            <div class="body-cols">
+              <div>
+                <p>Customer tenure is the single strongest continuous predictor of survival. In months 0–6 (1,481 accounts), 52.9% of subscribers leave; between months 7 and 12, attrition eases to 35.9%.</p>
+                <p>By Year 2 (13–24 months) churn falls to 28.7%, declining steadily through 19.0% in Year 4 and bottoming out at 6.6% among 1,407 six-year accounts.</p>
+              </div>
+              <div>
+                <p>Click any square marker along the 0–72 month timeline—or step with Left and Right arrow keys—to inspect cohort size, churn volume, and monthly revenue exposure at each tenure milestone.</p>
+                <p>As the section scrolls into view, the hazard curve draws smoothly across all seven tenure checkpoints.</p>
+              </div>
+            </div>
+
+            <div class="timeline-detail" id="timelineDetail" aria-live="polite"></div>
+          </div>
+
+          <div class="page-right">
+            <h3 class="h3-sub" style="font-size:15px;margin-bottom:var(--s-3);">% churn rate across tenure brackets (0–72 months)</h3>
+            <div id="chart05a"></div>
+            <div id="chart05b" class="timeline-axis-wrap"></div>
+            <div id="cap05"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 06: SCROLLYTELLING MONTHLY REVENUE BY TENURE (sticky scrollytelling) -->
+    <section class="spread spread--spined" id="s06" aria-labelledby="h06" data-sec-index="5" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid scrolly-grid-mid">
+          <div class="page-left">
+            <p class="kicker">06 — Scrollytelling MRR cohorts</p>
+            <h2 class="headline-h2" id="h06" tabindex="-1">
+              <span class="line"><span class="line-inner">Monthly revenue</span></span>
+              <span class="line"><span class="line-inner">shifts from at-risk</span></span>
+              <span class="line"><span class="line-inner">to locked-in terms.</span></span>
+            </h2>
+            <hr class="rule-strong">
+            <p class="body-single">Tracking all $456.1k in monthly recurring charges across six annual tenure cohorts reveals a bimodal revenue curve: $122.6k sits in unstable Year-1 accounts while $106.9k anchors Year-6 two-year contracts.</p>
+
+            <div class="scrolly-mobile-tabs">
+              <div class="seg-group" role="group" aria-label="Scrollytelling narrative steps">
+                <button type="button" class="seg-btn" data-step-tab="0" aria-pressed="true">Year 1 cliff</button>
+                <button type="button" class="seg-btn" data-step-tab="1" aria-pressed="false">1-Yr bridge</button>
+                <button type="button" class="seg-btn" data-step-tab="2" aria-pressed="false">Full stack</button>
+              </div>
+            </div>
+
+            <div class="scrolly-steps" id="scrollySteps">
+              <button type="button" class="scrolly-step is-active" data-step="0" aria-pressed="true">
+                <span class="micro-upper">Step 01 · Unprotected Year-1 MRR</span>
+                <span class="scrolly-step-title">Month-to-month dominates early billing</span>
+                <span class="scrolly-step-body">Isolating month-to-month contracts exposes $116.1k/mo (94.7% of Year-1 revenue) with zero contractual lock-in—tapering steadily to $9.9k/mo by Year 6 as fragile accounts churn out.</span>
+              </button>
+              <button type="button" class="scrolly-step" data-step="1" aria-pressed="false">
+                <span class="micro-upper">Step 02 · Mid-tenure conversion</span>
+                <span class="scrolly-step-title">One-year plans bridge mid-tenure accounts</span>
+                <span class="scrolly-step-body">Highlighting one-year commitments shows steady expansion from $4.4k/mo in Year 1 to $26.3k/mo in Year 6, absorbing upgrades before customers graduate to multi-year deals.</span>
+              </button>
+              <button type="button" class="scrolly-step" data-step="2" aria-pressed="false">
+                <span class="micro-upper">Step 03 · Mature revenue anchor</span>
+                <span class="scrolly-step-title">Two-year contracts stabilize Year-6 revenue</span>
+                <span class="scrolly-step-body">Restoring all three contract tiers highlights how Year-6 billing ($106.9k/mo) surges back—66.1% protected under two-year agreements ($70.7k/mo) with just 2.8% churn.</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="page-right">
+            <div class="scrolly-sticky">
+              <div class="controls-row">
+                <div id="volumeLegend" class="seg-group" style="gap:6px;" role="group" aria-label="Toggle contract series"></div>
+                <div class="seg-group" role="group" aria-label="Column display mode">
+                  <button type="button" class="seg-btn" data-vol-mode="abs" aria-pressed="true">MRR ($k)</button>
+                  <button type="button" class="seg-btn" data-vol-mode="share" aria-pressed="false">Share (%)</button>
+                </div>
+              </div>
+              <div id="chart06"></div>
+              <div id="cap06"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 07: INTERACTIVE RISK HEATMAP (FULL-WIDTH SPREAD, NO SPINE) -->
+    <section class="spread" id="s07" aria-labelledby="h07" data-sec-index="6" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="page-full">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:var(--s-6);align-items:end;">
+              <div>
+                <p class="kicker">07 — Interactive risk heatmap</p>
+                <h2 class="headline-h2" id="h07" tabindex="-1">
+                  <span class="line"><span class="line-inner">Electronic check</span></span>
+                  <span class="line"><span class="line-inner">compounds risk across</span></span>
+                  <span class="line"><span class="line-inner">every segment.</span></span>
+                </h2>
+              </div>
+              <div class="body-cols">
+                <div>
+                  <p>This 10×5 matrix cross-tabulates churn rates (%) across ten subscriber risk factors and all four billing channels plus overall segment rate. Every electronic-check row breaches 50% churn among high-risk cohorts.</p>
+                </div>
+                <div>
+                  <p>Sort by any payment column header to rank vulnerabilities live, or slide the threshold control to isolate cells exceeding your intervention floor.</p>
+                </div>
+              </div>
+            </div>
+
+            <hr class="rule-strong">
+
+            <div class="controls-row">
+              <label class="range-control" for="hmThreshold">
+                <span>Highlight churn rate at least <strong id="hmThresholdVal" class="num">0</strong> %</span>
+                <input type="range" id="hmThreshold" min="0" max="60" step="5" value="0">
+              </label>
+              <span class="mono-meta num" id="hmLiveCount" aria-live="polite">50 of 50 cells</span>
+            </div>
+
+            <div id="chart07"></div>
+            <div class="hm-ramp" aria-label="Heatmap churn intensity scale">
+              <span class="micro-upper" style="margin-right:var(--s-1);">Churn Rate</span>
+              <span class="hm-ramp-item"><span class="hm-ramp-box" style="background:var(--violet-100);"></span>0–9 %</span>
+              <span class="hm-ramp-item"><span class="hm-ramp-box" style="background:var(--violet-200);"></span>10–19 %</span>
+              <span class="hm-ramp-item"><span class="hm-ramp-box" style="background:var(--violet-300);"></span>20–29 %</span>
+              <span class="hm-ramp-item"><span class="hm-ramp-box" style="background:var(--violet-400);"></span>30–39 %</span>
+              <span class="hm-ramp-item"><span class="hm-ramp-box" style="background:var(--violet-500);"></span>40–49 %</span>
+              <span class="hm-ramp-item"><span class="hm-ramp-box" style="background:var(--violet-600);"></span>50+ %</span>
+            </div>
+            <div id="cap07"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 08: RETENTION WAFFLE & LIFECYCLE OUTCOMES (charts left, text right) -->
+    <section class="spread spread--spined" id="s08" aria-labelledby="h08" data-sec-index="7" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="page-left">
+            <div class="controls-row">
+              <h3 class="h3-sub" style="font-size:15px;">10×10 portfolio outcome waffle (per 100 accounts)</h3>
+              <div class="seg-group" role="group" aria-label="Filter waffle by internet service">
+                <button type="button" class="seg-btn" data-waffle-seg="All Accounts" aria-pressed="true">All</button>
+                <button type="button" class="seg-btn" data-waffle-seg="Fiber optic" aria-pressed="false">Fiber optic</button>
+                <button type="button" class="seg-btn" data-waffle-seg="DSL" aria-pressed="false">DSL</button>
+                <button type="button" class="seg-btn" data-waffle-seg="No internet" aria-pressed="false">No internet</button>
+              </div>
+            </div>
+            <div class="waffle-stage">
+              <div id="chart08a"></div>
+              <div class="waffle-stat-box">
+                <div class="waffle-rot-frame" id="waffleRotStat"></div>
+                <p class="fig-text" style="max-width:20ch;">in 100 customer accounts churned in this service tier</p>
+              </div>
+            </div>
+            <div id="cap08a"></div>
+
+            <div class="controls-row" style="margin-top:var(--s-6);">
+              <h3 class="h3-sub" style="font-size:15px;">Diverging outcome bars across subscriber segments</h3>
+              <div class="seg-group" role="group" aria-label="Sort subscriber segments">
+                <button type="button" class="seg-btn" data-likert-sort="original" aria-pressed="true">By churn risk</button>
+                <button type="button" class="seg-btn" data-likert-sort="retained" aria-pressed="false">By term retention</button>
+              </div>
+            </div>
+            <div id="chart08b"></div>
+            <div id="cap08b"></div>
+          </div>
+
+          <div class="page-right page-headline-first">
+            <p class="kicker">08 — Retention &amp; lifecycle split</p>
+            <h2 class="headline-h2" id="h08" tabindex="-1">
+              <span class="line"><span class="line-inner">Only 42 in 100</span></span>
+              <span class="line"><span class="line-inner">accounts sit behind</span></span>
+              <span class="line"><span class="line-inner">term protection.</span></span>
+            </h2>
+            <hr class="rule-strong">
+            <div class="body-cols">
+              <div>
+                <p>The 10×10 waffle lattice splits every 100 accounts into Churned (solid), Month-to-Month Retained (hatched at-risk buffer), and Term Retained (outlined 1–2 year lock-in). Filtering to Fiber optic jumps churned cells from 27 to 42 per 100.</p>
+                <p>Among DSL subscribers only 19 per 100 churn while 47 hold multi-year terms; phone-only accounts without internet drop churn to just 7 per 100.</p>
+              </div>
+              <div>
+                <p>Below, diverging lifecycle bars centre on Month-to-Month Retained so early exits (0–12 mo) and later exits (&gt;12 mo) pull left against durable one- and two-year retention on the right.</p>
+                <p>Notice the sharp contrast between Electronic Check payers (46% churned, 18% term-locked) and Online Security adopters (15% churned, 60% term-locked).</p>
+              </div>
+            </div>
+            <div class="evidence-summary-strip" aria-label="Concentration among churned accounts">
+              <div>
+                <span class="h3-sub num" id="evM2mPct" style="font-size:36px;font-weight:400;display:block;margin-bottom:4px;">88.6 %</span>
+                <span class="fig-text">of churned accounts were on month-to-month terms</span>
+              </div>
+              <div>
+                <span class="h3-sub num" id="evNoSecPct" style="font-size:36px;font-weight:400;display:block;margin-bottom:4px;">78.2 %</span>
+                <span class="fig-text">of churned accounts lacked online security add-ons</span>
+              </div>
+              <div>
+                <span class="h3-sub num" id="evEcheckPct" style="font-size:36px;font-weight:400;display:block;margin-bottom:4px;">57.3 %</span>
+                <span class="fig-text">of churned accounts billed via electronic check</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 09: TENURE VS CHURN SCATTER & OLS REGRESSION (text left, chart right) -->
+    <section class="spread spread--spined" id="s09" aria-labelledby="h09" data-sec-index="8" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="page-left">
+            <p class="kicker">09 — Tenure vs churn OLS</p>
+            <h2 class="headline-h2" id="h09" tabindex="-1">
+              <span class="line"><span class="line-inner">Each tenure month</span></span>
+              <span class="line"><span class="line-inner">cuts Fiber churn by</span></span>
+              <span class="line"><span class="line-inner">0.84 percentage pts.</span></span>
+            </h2>
+            <hr class="rule-strong">
+            <div class="body-cols">
+              <div>
+                <p>Every marker represents one of 30 tenure brackets (10 seven-month intervals × 3 internet service tiers) computed directly from the 7,043 rows. Across active cohorts, each additional month of tenure shifts churn by <strong data-slope>−0.51 pp</strong>.</p>
+                <p>Toggle off DSL and No internet opposite to isolate Fiber optic alone—the ordinary least-squares trend snaps into a tight linear decay with R² = 0.95.</p>
+              </div>
+              <div>
+                <p>Distinct geometric shapes (squares for Fiber, circles for DSL, triangles for No internet) distinguish service tiers without relying solely on colour.</p>
+                <p>Adjust the minimum-tenure slider to inspect whether decay holds past onboarding, or navigate active cohort markers with keyboard arrow keys.</p>
+              </div>
+            </div>
+            <div style="margin-top:var(--s-6);padding-top:var(--s-4);border-top:1px solid var(--rule);display:flex;gap:var(--s-6);flex-wrap:wrap;">
+              <div>
+                <span class="micro-upper" style="display:block;margin-bottom:4px;">OLS Slope</span>
+                <span class="h3-sub num" id="scatterSlopeReadout">−0.51 pp per tenure month</span>
+              </div>
+              <div>
+                <span class="micro-upper" style="display:block;margin-bottom:4px;">Fit</span>
+                <span class="h3-sub num" id="scatterR2Readout">R² 0.31</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-right">
+            <div class="controls-row">
+              <span class="h3-sub" style="font-size:15px;">Churn rate (y) vs mean tenure months (x), 30 service-tenure cohorts</span>
+            </div>
+            <div class="controls-row">
+              <div class="seg-group" id="scatterSectors" role="group" aria-label="Toggle internet service tiers"></div>
+              <label class="range-control" for="scatterMinScore">
+                <span>Min tenure <strong id="scatterMinVal" class="num">0</strong> mo</span>
+                <input type="range" id="scatterMinScore" min="0" max="50" step="5" value="0">
+              </label>
+              <label class="check-control" for="scatterTrendToggle">
+                <input type="checkbox" id="scatterTrendToggle" checked>
+                <span>Show OLS trend line</span>
+              </label>
+            </div>
+            <div id="chart09"></div>
+            <div id="cap09"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 10: CHURNED MRR SUMMARY & SEARCHABLE 36-SEGMENT INDEX -->
+    <section class="spread spread--spined spread--compact" id="s10" aria-labelledby="h10" data-sec-index="9" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="page-left">
+            <h3 class="h3-sub" style="font-size:15px;margin-bottom:var(--s-4);">Share of $139.1k churned MRR by contract term…</h3>
+            <div id="chart10a"></div>
+            <div id="cap10a"></div>
+          </div>
+
+          <div class="page-right page-headline-first">
+            <p class="kicker">10 — Segment risk index &amp; CSV</p>
+            <h2 class="headline-h2" id="h10" tabindex="-1">
+              <span class="line"><span class="line-inner">Search, sort, filter</span></span>
+              <span class="line"><span class="line-inner">and export all 36</span></span>
+              <span class="line"><span class="line-inner">churn segments.</span></span>
+            </h2>
+            <hr class="rule-strong">
+            <div class="body-cols">
+              <div>
+                <p>Monthly recurring revenue lost to churn totals $139,131/mo—87% ($120.8k) concentrated inside month-to-month billing. Below, all 36 Contract × Internet × Payment micro-segments are indexed live from the CSV.</p>
+              </div>
+              <div>
+                <p>Filter by keyword or contract term, sort any metric column, inspect each segment’s 6-year tenure hazard sparkline, and download the filtered segment dataset to CSV in one click.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Part B: Full-width interactive segment index table -->
+          <div class="page-full" style="margin-top:var(--s-6);margin-bottom:calc(-1 * var(--s-6));padding-top:var(--s-6);padding-bottom:var(--s-6);border-top:1px solid var(--ink);background:var(--paper);position:relative;z-index:2;">
+            <div class="controls-row">
+              <div>
+                <h3 class="h3-sub">Interactive Segment Risk Index (36 micro-segments · 7,043 accounts)</h3>
+                <p class="mono-meta num" id="marketCount" aria-live="polite" style="margin-top:4px;">Showing 36 of 36 segments</p>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:var(--s-3);align-items:center;">
+                <label class="sr-only" for="marketSearch">Search segments</label>
+                <input type="search" id="marketSearch" class="text-input" placeholder="Filter by internet or payment…">
+                <div class="seg-group" role="group" aria-label="Filter segments by contract" id="marketRegionFilters">
+                  <button type="button" class="seg-btn" data-mregion="All" aria-pressed="true">All</button>
+                  <button type="button" class="seg-btn" data-mregion="Month-to-month" aria-pressed="false">Month-to-month</button>
+                  <button type="button" class="seg-btn" data-mregion="One year" aria-pressed="false">One year</button>
+                  <button type="button" class="seg-btn" data-mregion="Two year" aria-pressed="false">Two year</button>
+                </div>
+                <button type="button" class="fig-table-btn" id="downloadCsvBtn">Download CSV ↓</button>
+              </div>
+            </div>
+            <div id="chart10b"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 11: ML CHURN PREDICTION, LIFT & UPLIFT CAMPAIGN TARGETING -->
+    <section class="spread spread--spined spread--compact" id="s11" aria-labelledby="h11" data-sec-index="10" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="page-left">
+            <p class="kicker">11 — ML prediction, lift &amp; uplift</p>
+            <h2 class="headline-h2" id="h11" tabindex="-1">
+              <span class="line"><span class="line-inner">Target persuadable</span></span>
+              <span class="line"><span class="line-inner">churners, not</span></span>
+              <span class="line"><span class="line-inner">sure things.</span></span>
+            </h2>
+            <hr class="rule-strong">
+            <div class="body-cols">
+              <div>
+                <p>Two scikit-learn-equivalent classifiers train live on a stratified 80/20 split of all 7,043 rows: an L2-regularized Logistic Regression (<code>C=1.0</code>, IRLS) and a Gradient Boosted Decision Tree ensemble (<code>45</code> trees, depth <code>3</code>).</p>
+                <p>Predictive <strong>Lift</strong> ranks accounts by baseline churn probability to concentrate outreach in high-risk deciles—capturing over half of all exits inside the top 20%.</p>
+              </div>
+              <div>
+                <p>Counterfactual <strong>Uplift</strong> (&tau; = P<sub>baseline</sub> &minus; P<sub>offer</sub>) measures incremental churn reduction from management’s retention offer, separating high-ROI <em>Persuadables</em> from low-risk <em>Sure Things</em>.</p>
+                <p>Use the controls opposite to compare models, inspect Decile Lift, Cumulative Gains, or Qini Uplift curves, and export the prioritized customer list below.</p>
+              </div>
+            </div>
+
+            <div class="ml-kpi-row" aria-label="Holdout ML validation and campaign impact">
+              <div>
+                <span class="micro-upper" style="display:block;margin-bottom:4px;">Holdout ROC-AUC</span>
+                <span class="h3-sub num" id="mlAucReadout" style="font-size:32px;font-weight:400;display:block;margin-bottom:4px;">—</span>
+                <span class="fig-text" id="mlAucSub">Training models on 5,636 rows…</span>
+              </div>
+              <div>
+                <span class="micro-upper" style="display:block;margin-bottom:4px;">Top-Decile Lift</span>
+                <span class="h3-sub num" id="mlLiftReadout" style="font-size:32px;font-weight:400;display:block;margin-bottom:4px;">—</span>
+                <span class="fig-text" id="mlLiftSub">vs 26.5% portfolio baseline</span>
+              </div>
+              <div>
+                <span class="micro-upper" style="display:block;margin-bottom:4px;">Target Est. 12m ROI</span>
+                <span class="h3-sub num" id="mlRoiReadout" style="font-size:32px;font-weight:400;display:block;margin-bottom:4px;">—</span>
+                <span class="fig-text" id="mlRoiSub">net after incentive credit</span>
+              </div>
+            </div>
+
+            <h3 class="h3-sub" style="font-size:15px;margin-top:var(--s-6);margin-bottom:var(--s-3);">Top predictive drivers (GB feature gain vs LogReg log-odds)</h3>
+            <div id="chart11b"></div>
+            <div id="cap11b"></div>
+          </div>
+
+          <div class="page-right">
+            <div class="controls-row">
+              <div class="seg-group" role="group" aria-label="Select ML classifier">
+                <button type="button" class="seg-btn" data-ml-model="gb" aria-pressed="true">Gradient Boost</button>
+                <button type="button" class="seg-btn" data-ml-model="logreg" aria-pressed="false">Logistic Reg</button>
+                <button type="button" class="seg-btn" data-ml-model="both" aria-pressed="false">Compare Both</button>
+              </div>
+              <div class="seg-group" role="group" aria-label="Select lift or uplift curve">
+                <button type="button" class="seg-btn" data-ml-curve="lift" aria-pressed="true">Cumulative Lift</button>
+                <button type="button" class="seg-btn" data-ml-curve="gains" aria-pressed="false">Cum. Gains</button>
+                <button type="button" class="seg-btn" data-ml-curve="uplift" aria-pressed="false">Uplift Curve</button>
+              </div>
+            </div>
+            <div class="controls-row">
+              <label class="range-control" for="mlTopPct">
+                <span>Target depth: Top <strong id="mlTopPctVal" class="num">20</strong>% (<span id="mlTargetCountInline" class="num">1,409</span>)</span>
+                <input type="range" id="mlTopPct" min="5" max="50" step="5" value="20">
+              </label>
+              <label style="display:inline-flex;align-items:center;gap:8px;">
+                <span class="micro-upper">Campaign offer</span>
+                <select id="mlOfferSelect" class="ml-select" aria-label="Select campaign retention offer">
+                  <option value="contract_security">1-Yr Term + Security ($10/mo credit)</option>
+                  <option value="autopay_support">Auto-Pay + Tech Support ($5/mo credit)</option>
+                  <option value="two_year_bundle">2-Yr Lock-in + Full Protection ($15/mo credit)</option>
+                </select>
+              </label>
+            </div>
+            <div id="chart11a"></div>
+            <div id="cap11a"></div>
+          </div>
+
+          <!-- Part B: Full-width campaign target list for management -->
+          <div class="page-full" style="margin-top:var(--s-6);margin-bottom:calc(-1 * var(--s-6));padding-top:var(--s-6);padding-bottom:var(--s-6);border-top:1px solid var(--ink);background:var(--paper);position:relative;z-index:2;">
+            <div class="controls-row">
+              <div>
+                <h3 class="h3-sub">Campaign Target List for Management</h3>
+                <p class="mono-meta num" id="mlTargetSummary" aria-live="polite" style="margin-top:4px;">Preparing scored target cohort…</p>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:var(--s-2);align-items:center;">
+                <button type="button" class="fig-table-btn" id="mlDownloadCsvBtn">Download Target CSV ↓</button>
+                <button type="button" class="fig-table-btn" id="mlDownloadPyBtn">Export sklearn (.py) ↓</button>
+              </div>
+            </div>
+
+            <div class="controls-row">
+              <div style="display:flex;flex-wrap:wrap;gap:var(--s-3);align-items:center;">
+                <label class="sr-only" for="mlSearch">Search customer ID or profile</label>
+                <input type="search" id="mlSearch" class="text-input" placeholder="Search customerID, Fiber, E-check…">
+                <div class="seg-group" role="group" aria-label="Campaign prioritization strategy">
+                  <button type="button" class="seg-btn" data-ml-rank="uplift" aria-pressed="true">Rank by Uplift (ROI)</button>
+                  <button type="button" class="seg-btn" data-ml-rank="risk" aria-pressed="false">Rank by Risk (Lift)</button>
+                  <button type="button" class="seg-btn" data-ml-rank="persuadable" aria-pressed="false">Persuadables Only</button>
+                </div>
+              </div>
+              <div class="seg-group" role="group" aria-label="Filter target list segment">
+                <button type="button" class="seg-btn" data-ml-seg="All" aria-pressed="true">All</button>
+                <button type="button" class="seg-btn" data-ml-seg="Month-to-month" aria-pressed="false">Month-to-month</button>
+                <button type="button" class="seg-btn" data-ml-seg="Fiber optic" aria-pressed="false">Fiber optic</button>
+                <button type="button" class="seg-btn" data-ml-seg="Electronic check" aria-pressed="false">E-check</button>
+              </div>
+            </div>
+
+            <div id="chart11c"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 12: CAUSAL OBSERVATIONAL STUDY — PROPENSITY SCORE MATCHING & ROSENBAUM SENSITIVITY -->
+    <section class="spread spread--spined spread--compact" id="s12" aria-labelledby="h12" data-sec-index="11" data-reveal>
+      <div class="spread-container">
+        <div class="spread-grid">
+          <div class="page-left">
+            <p class="kicker">12 — Causal observational study · Propensity score matching</p>
+            <h2 class="headline-h2" id="h12" tabindex="-1">
+              <span class="line"><span class="line-inner">Did Fiber’s non-RCT</span></span>
+              <span class="line"><span class="line-inner">campaign deliver a</span></span>
+              <span class="line"><span class="line-inner">1-year net ROI?</span></span>
+            </h2>
+            <hr class="rule-strong">
+            <div class="body-cols">
+              <div>
+                <p>One year ago, management pushed Fiber optic upgrades (n = 3,096) without running an A/B test or randomized controlled trial (RCT). Because there was <strong>no counterfactual</strong>—we cannot observe the same customer simultaneously on Fiber and DSL—we compare upgraded Fiber users against DSL users (n = 2,421). Raw numbers make Fiber look +22.9 percentage points (pp) worse on churn (41.9% vs 19.0%), alongside +$33.40/mo higher bills.</p>
+                <p>However, the Fiber push heavily targeted customers already prone to leaving: month-to-month, paperless, electronic-check, and unbundled accounts (<code>max |SMD| = 0.728</code>). Comparing those groups raw mixes up <strong>who was pitched</strong> with <strong>what Fiber actually did</strong> (Rosenbaum &amp; Rubin, 1983; Rosenbaum, 2010).</p>
+              </div>
+              <div>
+                <p>To construct an apples-to-apples benchmark (Rosenbaum, 2010, Ch. 18), we exclude post-upgrade pricing (<code>MonthlyCharges</code>) and pair each Fiber upgrade 1:1 with a statistically similar DSL twin using a propensity caliper <em>c</em> · SD(logit <em>ê</em>) (Rosenbaum &amp; Rubin, 1985). Matching cuts the apparent churn gap nearly in half—leaving a true causal effect of roughly <strong>+11 to +12 pp more churn</strong>, not less.</p>
+                <p>Because an observational study can never rule out unrecorded factors (e.g. rival promos or outages), we run <strong>Rosenbaum sensitivity bounds (&Gamma;)</strong> (Rosenbaum, 2002, Ch. 4; 2017) to measure how large an invisible bias would have to be to overturn our ROI and churn conclusions.</p>
+              </div>
+            </div>
+
+            <div class="psm-kpi-row" aria-label="Propensity score matching causal impact summary">
+              <div>
+                <span class="micro-upper" style="display:block;margin-bottom:4px;">Apples-to-Apples Twins</span>
+                <span class="h3-sub num" id="psmPairsReadout" style="font-size:30px;font-weight:400;display:block;margin-bottom:4px;">—</span>
+                <span class="fig-text" id="psmPairsSub">Running propensity caliper match…</span>
+              </div>
+              <div>
+                <span class="micro-upper" style="display:block;margin-bottom:4px;">True Churn Impact (More Churn)</span>
+                <span class="h3-sub num" id="psmAttReadout" style="font-size:30px;font-weight:400;display:block;margin-bottom:4px;">—</span>
+                <span class="fig-text" id="psmAttSub">vs +22.9 pp unadjusted naive gap</span>
+              </div>
+              <div>
+                <span class="micro-upper" style="display:block;margin-bottom:4px;">1-Yr Net Profit &amp; ROI / Upgrade</span>
+                <span class="h3-sub num" id="psmRoiReadout" style="font-size:30px;font-weight:400;display:block;margin-bottom:4px;">—</span>
+                <span class="fig-text" id="psmRoiSub">realized 1-yr rev lift minus upgrade cost</span>
+              </div>
+              <div>
+                <span class="micro-upper" style="display:block;margin-bottom:4px;">Hidden-Bias Buffer (&Gamma;*)</span>
+                <span class="h3-sub num" id="psmGammaReadout" style="font-size:30px;font-weight:400;display:block;margin-bottom:4px;">—</span>
+                <span class="fig-text" id="psmGammaSub">how much hidden skew breaks confidence</span>
+              </div>
+            </div>
+
+            <h3 class="h3-sub" style="font-size:15px;margin-top:var(--s-6);margin-bottom:var(--s-3);">Naive vs. PSM Matched Effect Decomposition (Churn Bias &amp; 1-Yr Net Revenue)</h3>
+            <div id="chart12b"></div>
+            <div id="cap12b"></div>
+          </div>
+
+          <div class="page-right">
+            <div class="controls-row">
+              <div class="seg-group" role="group" aria-label="Select propensity score specification">
+                <button type="button" class="seg-btn" data-psm-spec="full" aria-pressed="true">Full Selection (12 covs)</button>
+                <button type="button" class="seg-btn" data-psm-spec="household" aria-pressed="false">Household Only (8 covs)</button>
+              </div>
+              <div class="seg-group" role="group" aria-label="Select caliper width">
+                <button type="button" class="seg-btn" data-psm-caliper="0.10" aria-pressed="false">0.10 SD</button>
+                <button type="button" class="seg-btn" data-psm-caliper="0.20" aria-pressed="true">0.20 SD (R&amp;R)</button>
+                <button type="button" class="seg-btn" data-psm-caliper="0.50" aria-pressed="false">0.50 SD</button>
+              </div>
+            </div>
+            <div class="controls-row">
+              <div class="seg-group" role="group" aria-label="Select PSM diagnostic visualization">
+                <button type="button" class="seg-btn" data-psm-view="love" aria-pressed="true">Love Plot (|SMD|)</button>
+                <button type="button" class="seg-btn" data-psm-view="gamma" aria-pressed="false">Rosenbaum &Gamma; Bounds</button>
+                <button type="button" class="seg-btn" data-psm-view="overlap" aria-pressed="false">Propensity Overlap</button>
+              </div>
+              <label class="range-control" for="psmCostSlider">
+                <span>Upgrade cost $<strong id="psmCostVal" class="num">150</strong></span>
+                <input type="range" id="psmCostSlider" min="0" max="400" step="25" value="150">
+              </label>
+            </div>
+            <div id="chart12a"></div>
+            <div id="cap12a"></div>
+          </div>
+
+          <!-- Part B: Plain-Language Business Takeaways, Audit Tables & Rosenbaum Bibliography -->
+          <div class="page-full" style="margin-top:var(--s-6);margin-bottom:calc(-1 * var(--s-6));padding-top:var(--s-6);padding-bottom:var(--s-6);border-top:1px solid var(--ink);background:var(--paper);position:relative;z-index:2;">
+            <div class="psm-takeaway-block" id="psmTakeawayBlock" aria-label="Plain-language executive conclusions">
+              <span class="micro-upper">Plain-Language Business Guide &amp; Empirical Conclusions (Live from Selected Settings)</span>
+              <div class="psm-takeaway-grid">
+                <div class="psm-takeaway-col">
+                  <h4 class="psm-takeaway-title" id="psmTakeawayChurnTitle">1. What +11.9 pp churn means (more or less?)</h4>
+                  <p class="psm-takeaway-body" id="psmTakeawayChurnBody">Calculating matched churn comparison…</p>
+                </div>
+                <div class="psm-takeaway-col">
+                  <h4 class="psm-takeaway-title" id="psmTakeawayRoiTitle">2. Did the 1-year campaign earn a positive ROI?</h4>
+                  <p class="psm-takeaway-body" id="psmTakeawayRoiBody">Calculating matched 1-year ROI…</p>
+                </div>
+                <div class="psm-takeaway-col">
+                  <h4 class="psm-takeaway-title" id="psmTakeawayGammaTitle">3. What Rosenbaum &Gamma; bounds mean to management</h4>
+                  <p class="psm-takeaway-body" id="psmTakeawayGammaBody">Calculating hidden-bias sensitivity…</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="controls-row">
+              <div>
+                <h3 class="h3-sub">Matched-Pair 1-Year ROI &amp; Rosenbaum Primal Sensitivity Audit</h3>
+                <p class="mono-meta num" id="psmSummaryLine" aria-live="polite" style="margin-top:4px;">Computing matched counterfactual outcomes…</p>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:var(--s-2);align-items:center;">
+                <button type="button" class="fig-table-btn" id="psmOpenReportBtn">Summary Report / Print ↗</button>
+                <button type="button" class="fig-table-btn" id="psmDownloadPdfBtn">Download Summary PDF ↓</button>
+                <button type="button" class="fig-table-btn" id="psmDownloadPairsBtn">Download Matched Pairs CSV ↓</button>
+              </div>
+            </div>
+
+            <div id="chart12c"></div>
+
+            <div class="psm-citations-block" aria-label="Rosenbaum observational study bibliography">
+              <span class="micro-upper">Methodological Foundations &amp; Citations · Paul R. Rosenbaum on Observational Studies</span>
+              <div class="psm-citations-grid" id="psmCitationsGrid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="colophon" role="contentinfo">
+    <div class="spread-container">
+      <div class="colophon-grid">
+        <div class="colophon-col">
+          <span class="logotype logotype--footer">
+            <span class="logotype-brand">folio</span><span class="logotype-rule"></span><span class="logotype-title">Telco Churn</span><span class="logotype-year">7,043</span>
+          </span>
+          <span class="micro-upper" style="margin-top:var(--s-2);">Subscriber Retention &amp; Churn Analytics</span>
+        </div>
+        <div class="colophon-col">
+          <span class="micro-upper">Source Dataset</span>
+          <p>All metrics, regression slopes, tenure hazard curves, and segment tables are parsed and aggregated client-side directly from Telco-Customer-Churn (n = 7,043 rows, 21 attributes).</p>
+        </div>
+        <div class="colophon-col">
+          <span class="micro-upper">Accessibility &amp; Themes</span>
+          <p>Includes 10 responsive SVG &amp; HTML chart patterns, WCAG 2.2 AA contrast across 7 live themes, full keyboard navigation, expandable HTML data tables, and CSV export.</p>
+        </div>
+        <div class="colophon-col">
+          <span class="micro-upper">Data Notes</span>
+          <p>Eleven new accounts with zero months tenure carry blank TotalCharges fields in the raw CSV and are normalized to $0.00. Monthly recurring figures sum MonthlyCharges across active filters.</p>
+        </div>
+      </div>
+
+      <div class="colophon-bottom">
+        <a href="#s01" class="back-top">Back to top ↑</a>
+        <button type="button" class="fig-table-btn" id="footerReportBtn">Summary PDF &amp; Print Brief ↗</button>
+      </div>
+    </div>
+  </footer>
+
+  <dialog id="themePanel" class="theme-panel" aria-labelledby="themePanelTitle">
+    <div class="theme-panel-inner" id="themePanelInner">
+      <div class="theme-panel-band">
+        <div class="theme-panel-band-left">
+          <span class="band-folio num">CP</span>
+          <h2 id="themePanelTitle">Control panel</h2>
+        </div>
+        <button type="button" class="band-btn" id="themePanelClose">
+          <span>Close</span>
+          <span class="band-close-x" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <div class="theme-panel-body">
+        <p class="mono-meta">Colour theme</p>
+        <p class="theme-panel-lede">Recolours every page, chart and control. Layout stays the same.</p>
+        <fieldset class="theme-list" id="themeList">
+          <legend class="sr-only">Colour theme</legend>
+        </fieldset>
+      </div>
+
+      <div class="theme-panel-footer">
+        <button type="button" class="seg-btn" id="themeReset">Reset to default</button>
+        <button type="button" class="seg-btn" id="panelReportBtn">Summary PDF ↗</button>
+      </div>
+      <p id="themeStatus" role="status" aria-live="polite" class="sr-only"></p>
+    </div>
+  </dialog>
+
+  <dialog id="reportDialog" class="report-dialog" aria-labelledby="reportDialogTitle">
+    <div class="report-dialog-inner" id="reportDialogInner">
+      <div class="theme-panel-band">
+        <div class="theme-panel-band-left">
+          <span class="band-folio num">PDF</span>
+          <h2 id="reportDialogTitle">Executive Summary Report &amp; Print Brief</h2>
+        </div>
+        <button type="button" class="band-btn" id="reportDialogClose">
+          <span>Close</span>
+          <span class="band-close-x" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="report-dialog-body">
+        <div id="reportSheetPreview" class="report-sheet"></div>
+      </div>
+      <div class="theme-panel-footer" style="flex-wrap:wrap;">
+        <label class="check-control" for="reportIncludeOverview">
+          <input type="checkbox" id="reportIncludeOverview" checked>
+          <span>Include Portfolio &amp; ML Overview (Sec 01–11)</span>
+        </label>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--s-2);align-items:center;">
+          <button type="button" class="fig-table-btn" id="reportPrintBtn">Print / Browser PDF ↗</button>
+          <button type="button" class="fig-table-btn" id="reportDownloadPdfBtn" style="background:var(--ink);color:var(--paper);">Download PDF (.pdf) ↓</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="printReportMount" class="print-report-mount" hidden></div>
+
+  <div role="tooltip" id="tt" hidden>
+    <div class="tt-cat" id="ttCat"></div>
+    <div class="tt-val" id="ttVal"></div>
+    <div class="tt-sub" id="ttSub"></div>
+  </div>
+  <div class="sr-only" id="liveRegion" aria-live="polite"></div>
+
+  <script type="module" src="./src/telcoApp.ts"></script>
+</body>
+</html>
