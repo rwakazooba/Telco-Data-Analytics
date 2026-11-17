@@ -6,8 +6,9 @@ Adding bespoke analytics to IBM data
 
 ## Live Dashboard Preview
 
+- **GitHub Pages Site:** [https://rwakazooba.github.io/Telco-Data-Analytics/](https://rwakazooba.github.io/Telco-Data-Analytics/)
 - **Instant Preview (Hosted App):** [Open Live Dashboard Preview](https://ais-pre-7hba6m4vd4eapr76hw6szo-101029925171.europe-west2.run.app)
-- **GitHub Pages Preview (Your Fork / Repo):** After pushing this repository to GitHub, enable **Settings → Pages → Build and deployment → Source: GitHub Actions**. The included workflow (`.github/workflows/deploy-pages.yml`) automatically builds `dist/` with relative asset paths (`base: './'`) and publishes an interactive preview URL at `https://<your-username>.github.io/<repo-name>/` (also surfaced in GitHub's **Deployments / Environments** sidebar).
+- **GitHub Pages Setup:** In your repository, ensure **Settings → Pages → Build and deployment → Source: GitHub Actions** is selected. The included workflow (`.github/workflows/deploy-pages.yml`) automatically builds `dist/` with relative asset paths (`base: './'`) and publishes updates to the site above (also surfaced in GitHub's **Deployments / Environments** sidebar).
 
 ## Local Build & Preview
 
